@@ -2,17 +2,17 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import HelloWorld from './components/HelloWorld.vue'
-import TestButton from './components/TestButton.vue'
+import Test from './components/Test.vue'
 import Login from './components/Login.vue'
+import BaseTopBar from './components/BaseTopBar.vue';
 </script>
 
 <template>
-  <!--
-  <img alt="Vue logo" src="./assets/logo.png" />
+  <!-- <img alt="Vue logo" src="./assets/logo.png" />
   <HelloWorld msg="Hello Vue 3 + Vite" />
-  <TestButton></TestButton>
-  -->
   <Login></Login>
+  <BaseTopBar></BaseTopBar> -->
+  <Test></Test>
 </template>
 
 

@@ -1,10 +1,44 @@
 <script setup>
+import { reactive } from 'vue'
+
+// do not use same name with ref
+const form = reactive({
+    name: '',
+    password: '',
+})
+
+const onSubmit = () => {
+    console.log(form.name + ': ' + form.password);
+}
 </script>
 
 <template>
     <div class="login-panel">
-        <div class="test-class">test</div>
-        <div class="login-area"></div>
+        <div class="login-area">
+            <div class="login-text">测试管理系统</div>
+            <el-form
+                class="login-form"
+                ref="formRef"
+                :model="form"
+                label-position="left"
+                label-width="60px"
+            >
+                <el-form-item class="label-text" label="用户名">
+                    <el-input class="input-area" v-model="form.name" placeholder="请输入用户名"></el-input>
+                </el-form-item>
+                <el-form-item class="label-text" label="密码">
+                    <el-input
+                        class="input-area"
+                        v-model="form.password"
+                        type="password"
+                        placeholder="请输入密码"
+                    ></el-input>
+                </el-form-item>
+                <el-form-item class="login-button-area">
+                    <el-button class="login-button" type="primary" @click="onSubmit">登录</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
     </div>
 </template>
 
@@ -27,12 +61,40 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 300px;
-    height: 300px;
-    margin: -190px 0 0 -175px;
-    background-color: rgba(255, 255, 255, 0.5);
+    width: 450px;
+    height: 220px;
+    margin: -110px 0 0 -225px;
+    background-color: rgba(255, 255, 255, 0.7);
 }
-.test-class {
-    overflow: hidden;
+
+.login-form {
+    padding-top: 20px;
+}
+
+.login-text {
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    line-height: 49px;
+    border-bottom: 1px solid white;
+}
+
+.label-text {
+    padding-left: 20px;
+}
+
+.input-area {
+    padding-right: 20px;
+}
+
+.login-button-area {
+    /*
+    去掉 label-width="60px" 的影响
+    */
+    margin-left: -60px;
+}
+
+.login-button {
+    margin: auto;
 }
 </style>
