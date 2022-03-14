@@ -1,5 +1,7 @@
 <script setup>
 import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 // do not use same name with ref
 const form = reactive({
@@ -7,8 +9,28 @@ const form = reactive({
     password: '',
 })
 
+const router = useRouter()
+
 const onSubmit = () => {
-    console.log(form.name + ': ' + form.password);
+    const url = 'http://127.0.0.1:8080/login'
+    axios.get(url, {
+        params: {
+            name: form.name,
+            password: form.password
+        }
+    }).then(function (response) {
+        if (response.data.status === 'success') {
+            console.log('success');
+        } else {
+            console.log('error');
+        }
+    })
+    // if (form.name === 'admin' && form.password === '123456') {
+    //     console.log(form.name + ': ' + form.password)
+    //     router.push('/home')
+    // } else {
+    //     console.error('No permission!')
+    // }
 }
 </script>
 
