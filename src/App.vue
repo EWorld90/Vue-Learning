@@ -7,9 +7,6 @@ import Login from './components/Login.vue';
 </script>
 
 <template>
-  <!-- <Login></Login> -->
-  <!-- <Header></Header>
-  <BaseTable></BaseTable> -->
   <router-view></router-view>
 </template>
 

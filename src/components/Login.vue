@@ -76,7 +76,7 @@ const onSubmit = () => {
     position: relative;
     width: 100%;
     height: 100%;
-    background-image: url(../assets/login-bg2.jpg);
+    background-image: url(../assets/login-bg.jpg);
     background-size: 100%;
     background-position: center top;
     background-repeat: no-repeat;
