@@ -20,17 +20,20 @@ const onSubmit = () => {
         }
     }).then(function (response) {
         if (response.data.status === 'success') {
-            console.log('success');
+            console.log('success')
+            router.push('/basetable')
         } else {
-            console.log('error');
+            console.log('error')
+        }
+    }).catch(function (error) {
+        console.log(error);
+        console.log('server error')
+        // TEST 后端连接失败时也可登录
+        if (form.name === 'admin' && form.password === '123456') {
+            console.log('success')
+            router.push('/basetable')
         }
     })
-    // if (form.name === 'admin' && form.password === '123456') {
-    //     console.log(form.name + ': ' + form.password)
-    //     router.push('/home')
-    // } else {
-    //     console.error('No permission!')
-    // }
 }
 </script>
 

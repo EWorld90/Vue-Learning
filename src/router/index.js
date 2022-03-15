@@ -2,13 +2,23 @@ import {createRouter,createWebHistory} from "vue-router";
 
 const routes = [
     {
-        path: '/',
+        path: '/login',
+        name: 'Login',
         component: () => import('../components/Login.vue')
     },
     {
         path: '/home',
-        component: () => import('../components/Home.vue')
-    }
+        name: 'Home',
+        component: () => import('../components/Home.vue'),
+        children: [
+            {
+                path: '/basetable',
+                name: 'BaseTable',
+                component: () => import('../components/BaseTable.vue')
+            }
+        ]
+    },
+    
 ]
 
 const router = createRouter(

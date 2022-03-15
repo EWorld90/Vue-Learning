@@ -1,34 +1,33 @@
 <script setup>
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 
-const defaultActiveIndex = ref('1')
+// 菜单高亮与路由跳转的界面绑定
+const route = useRoute();
+const activeIndex = ref(route.path);
 
 const handleSelect = (key, keyPath) => {
-    console.log(key, keyPath)
+    console.log(key, keyPath);
 }
 </script>
 
 <template>
-    <el-row class="top-bar">
-        <el-col :span="3" class="top-bar-label">测试管理系统</el-col>
-        <el-col :span="21">
-            <el-menu
-                :default-active=defaultActiveIndex
-                class="top-bar-main-menu"
-                mode="horizontal"
-                background-color="#545c64"
-                text-color="#fff"
-                active-text-color="#ffd04b"
-                default-active="1"
-                @select="handleSelect"
-            >
-                <el-menu-item index="1">Data</el-menu-item>
-                <el-menu-item index="2">Workspace</el-menu-item>
-                <el-menu-item index="3">Info</el-menu-item>
-                <el-menu-item index="4">User Center</el-menu-item>
-            </el-menu>
-        </el-col>
-    </el-row>
+    <el-menu
+        :default-active="activeIndex"
+        class="top-bar-main-menu"
+        mode="horizontal"
+        background-color="#545c64"
+        text-color="#fff"
+        active-text-color="#ffd04b"
+        router
+        @select="handleSelect"
+    >
+        <span class="top-bar-label">测试管理系统</span>
+        <el-menu-item index="/basetable">Table</el-menu-item>
+        <el-menu-item index="">Workspace</el-menu-item>
+        <el-menu-item index="">Info</el-menu-item>
+        <el-menu-item index="/login">User Center</el-menu-item>
+    </el-menu>
 </template>
 
 <style scoped>
@@ -36,8 +35,10 @@ const handleSelect = (key, keyPath) => {
     background-color: #545c64;
 }
 
-.top-bar-label{
-    margin: auto;
+.top-bar-label {
+    text-align: center;
+    line-height: 58px;
+    width: 160px;
     color: lightseagreen;
 }
 </style>
