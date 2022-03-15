@@ -11,7 +11,7 @@ const avatarSize = ref(60);
 <template>
     <el-card class="user-card">
         <div class="user-avatar">
-            <el-avatar :size="avatarSize" :src="avatarUrl"> user </el-avatar>
+            <el-avatar :size="avatarSize" :src="avatarUrl" alt="User"></el-avatar>
         </div>
         <div class="user-info">
             admin
