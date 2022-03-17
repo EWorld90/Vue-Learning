@@ -16,6 +16,7 @@ const getTableData = () => {
         .then(function (response) {
             let tableDataTemp = response.data;
             formatTableData(tableDataTemp);
+
             // TEST 控制台输出提示
             console.log('Get table data success');
             console.log(response.data);
@@ -27,7 +28,15 @@ const getTableData = () => {
 
 // 格式化表格信息
 const formatTableData = (tableDataTemp) => {
-    // TODO 将状态由状态 id 变为具体状态文字
+    for(let i = 0; i < tableDataTemp.length; i++) {
+        // TODO 获取数据库中状态 id 与状态名称的关系
+        if(tableDataTemp[i].status === 1) {
+            tableDataTemp[i].status = '已完成';
+        } else if(tableDataTemp[i].status === 2) {
+            tableDataTemp[i].status = '进行中';
+        }
+    }
+
     tableData.value = tableDataTemp;
 };
 
@@ -66,6 +75,10 @@ const checkDeleteTableRow = (rowIndex, rowId) => {
                 message: '删除成功',
             })
         })
+        .catch(() => {
+            // TEST 控制台输出提示
+            console.log('Canceled');
+        })
 }
 
 // 初始化
@@ -86,7 +99,7 @@ getTableData();
             <el-table-column label="状态" prop="status" align="center">
                 <template #default="scope">
                     <el-tag
-                        :type="scope.row.status === 1 ? 'success' : scope.row.status === 2 ? 'danger' : ''
+                        :type="scope.row.status === '已完成' ? 'success' : scope.row.status === 3 ? 'danger' : ''
                         "
                     >{{ scope.row.status }}</el-tag>
                 </template>
