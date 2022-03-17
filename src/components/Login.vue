@@ -43,7 +43,6 @@ const onSubmit = () => {
             <div class="login-text">测试管理系统</div>
             <el-form
                 class="login-form"
-                ref="formRef"
                 :model="form"
                 label-position="left"
                 label-width="60px"
