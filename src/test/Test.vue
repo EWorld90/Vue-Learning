@@ -79,7 +79,7 @@ const checkDeleteTableRow = (rowIndex, rowId) => {
         .catch(() => {
             // TEST 控制台输出提示
             console.log('Canceled');
-        })
+        });
 }
 
 // 添加表格数据的表单
@@ -98,6 +98,10 @@ const insertData = () => {
         status: 1
     })
         .then(function (response) {
+            // 提交完成后清除表单信息
+            insertDataForm.name = '';
+            insertDataForm.date = '';
+            
             // TEST 控制台输出提示
             console.log('add ' + response.data + ' row');
         })
@@ -107,12 +111,32 @@ const insertData = () => {
         .then(function () {
             // TODO 刷新表格时会重复访问数据库，注意性能问题
             getTableData();
+            dialogInsertDataFormVisible.value = false;
         });
 }
 
 // TODO 添加表格数据确认
 const checkInsertData = () => {
-
+    ElMessageBox.confirm(
+        '确认添加？',
+        '警告',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(() => {
+            insertData();
+            ElMessage({
+                type: 'success',
+                message: '添加成功',
+            });
+        })
+        .catch(() => {
+            // TEST 控制台输出提示
+            console.log('Canceled');
+        });
 }
 
 // 页面初始化操作
@@ -172,7 +196,7 @@ getTableData();
         <template #footer>
             <span class="dialog-insert-data-footer">
                 <el-button @click="dialogInsertDataFormVisible = false">取消</el-button>
-                <el-button type="primary" @click="insertData">确认</el-button>
+                <el-button type="primary" @click="checkInsertData">确认</el-button>
             </span>
         </template>
     </el-dialog>
