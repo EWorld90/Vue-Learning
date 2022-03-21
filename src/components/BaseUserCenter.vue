@@ -6,6 +6,8 @@ import avatar from '../assets/ffxiv.jpg';
 const avatarUrl = ref(avatar);
 
 const avatarSize = ref(60);
+
+const username = ref(localStorage.getItem('username'));
 </script>
 
 <template>
@@ -13,9 +15,7 @@ const avatarSize = ref(60);
         <div class="user-avatar">
             <el-avatar :size="avatarSize" :src="avatarUrl" alt="User"></el-avatar>
         </div>
-        <div class="user-info">
-            admin
-        </div>
+        <div class="user-info">{{ username }}</div>
     </el-card>
 </template>
 

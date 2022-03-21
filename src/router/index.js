@@ -44,10 +44,22 @@ const router = createRouter(
 
 router.beforeEach((to, from, next) => {
     const username = localStorage.getItem('username');
-    
-    if (!username && to.path !== '/login') {
+
+    // TEST test页面无视导航守卫
+    if (to.path === '/test') {
+        // TEST 控制台输出提示
+        console.log(to.path);
+
+        next();
+    } else if (!username && to.path !== '/login') {
+        // TEST 控制台输出提示
+        console.log(to.path + ' goto login');
+
         next('/login');
     } else {
+        // TEST 控制台输出提示
+        console.log(to.path);
+
         next();
     }
 });
