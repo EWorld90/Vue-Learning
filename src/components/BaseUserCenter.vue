@@ -23,6 +23,7 @@ const username = ref(localStorage.getItem('username'));
 .user-card {
     width: 30%;
     margin: auto;
+    margin-top: 50px;
 }
 
 .user-avatar {
