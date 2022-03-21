@@ -8,6 +8,11 @@ const activeIndex = ref(route.path);
 
 const handleSelect = (index, indexPath) => {
     console.log(index, indexPath);
+    
+    // TEST 测试删除用户登录缓存
+    if (index === '/login') {
+        localStorage.removeItem('username');
+    }
 }
 </script>
 

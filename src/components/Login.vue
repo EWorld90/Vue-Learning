@@ -20,13 +20,18 @@ const onSubmit = () => {
         }
     }).then(function (response) {
         if (response.data.status === 'success') {
+            // TEST 控制台输出提示
             console.log('success')
+
+            localStorage.setItem('username', form.name);
             router.push('/basetable')
         } else {
-            console.log('error')
+            // TEST 控制台输出提示
+            console.log('authentication error')
         }
     }).catch(function (error) {
         console.log(error);
+        // TEST 控制台输出提示
         console.log('server error')
         // TEST 后端连接失败时也可登录
         if (form.name === 'admin' && form.password === '123456') {

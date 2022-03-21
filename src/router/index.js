@@ -23,6 +23,10 @@ const routes = [
             }
         ]
     },
+    {
+        path: '/',
+        redirect: '/basetable'
+    },
     // TEST 测试界面路由入口
     {
         path: '/test',
@@ -37,5 +41,15 @@ const router = createRouter(
         routes
     }
 );
+
+router.beforeEach((to, from, next) => {
+    const username = localStorage.getItem('username');
+    
+    if (!username && to.path !== '/login') {
+        next('/login');
+    } else {
+        next();
+    }
+});
 
 export default router;
