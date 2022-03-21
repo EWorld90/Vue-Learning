@@ -6,8 +6,8 @@ import { useRoute } from 'vue-router'
 const route = useRoute();
 const activeIndex = ref(route.path);
 
-const handleSelect = (key, keyPath) => {
-    console.log(key, keyPath);
+const handleSelect = (index, indexPath) => {
+    console.log(index, indexPath);
 }
 </script>
 

@@ -1,6 +1,8 @@
 <script setup>
 import HeaderBar from './HeaderBar.vue';
 
+// TEST 控制台输出提示
+console.log(localStorage.getItem('username'));
 </script>
 
 <template>
