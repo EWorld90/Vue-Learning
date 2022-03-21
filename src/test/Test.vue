@@ -143,12 +143,17 @@ const checkInsertData = () => {
 const dialogEditDataFormVisible = ref(false);
 
 const editDataForm = reactive({
+    id: '',
     name: '',
     status: ''
 });
 
+let editRow;
+
 // 初始化编辑表格数据的表单
-const initEditDataForm = (editRow) => {
+const initEditDataForm = (row) => {
+    editRow = row;
+    editDataForm.id = editRow.id;
     editDataForm.name = editRow.name;
 
     // TODO 获取数据库中状态 id 与状态名称的关系
@@ -163,7 +168,31 @@ const initEditDataForm = (editRow) => {
 
 // 编辑表格数据
 const editData = () => {
-    console.log('edited');
+    // 本地更新表格数据
+    editRow.name = editDataForm.name;
+
+    // TODO 获取数据库中状态 id 与状态名称的关系
+    if(editDataForm.status === 1) {
+        editRow.status = '进行中';
+    } else if (editDataForm.status === 2) {
+        editRow.status = '已完成';
+    }
+
+    axios.post('http://127.0.0.1:8080/testData/updateNameAndStatus', {
+        id: editDataForm.id,
+        name: editDataForm.name,
+        status: editDataForm.status
+    })
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log('edit ' + response.data + ' row');
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        .then(function () {
+            dialogEditDataFormVisible.value = false;
+        });
 }
 
 // 编辑表格数据确认

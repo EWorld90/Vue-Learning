@@ -31,10 +31,10 @@ const getTableData = () => {
 const formatTableData = (tableDataTemp) => {
     for (let i = 0; i < tableDataTemp.length; i++) {
         // TODO 获取数据库中状态 id 与状态名称的关系
-        if (tableDataTemp[i].status === 2) {
-            tableDataTemp[i].status = '已完成';
-        } else if (tableDataTemp[i].status === 1) {
+        if (tableDataTemp[i].status === 1) {
             tableDataTemp[i].status = '进行中';
+        } else if (tableDataTemp[i].status === 2) {
+            tableDataTemp[i].status = '已完成';
         }
     }
 
@@ -82,7 +82,7 @@ const checkDeleteTableRow = (rowIndex, rowId) => {
         });
 }
 
-// 添加表格数据的表单
+// 添加表格数据的表单交互
 const dialogInsertDataFormVisible = ref(false);
 
 const insertDataForm = reactive({
@@ -101,7 +101,7 @@ const insertData = () => {
             // 提交完成后清除表单信息
             insertDataForm.name = '';
             insertDataForm.date = '';
-            
+
             // TEST 控制台输出提示
             console.log('add ' + response.data + ' row');
         })
@@ -115,7 +115,7 @@ const insertData = () => {
         });
 }
 
-// TODO 添加表格数据确认
+// 添加表格数据确认
 const checkInsertData = () => {
     ElMessageBox.confirm(
         '确认添加？',
@@ -131,6 +131,86 @@ const checkInsertData = () => {
             ElMessage({
                 type: 'success',
                 message: '添加成功',
+            });
+        })
+        .catch(() => {
+            // TEST 控制台输出提示
+            console.log('Canceled');
+        });
+}
+
+// 编辑表格数据的表单交互
+const dialogEditDataFormVisible = ref(false);
+
+const editDataForm = reactive({
+    id: '',
+    name: '',
+    status: ''
+});
+
+let editRow;
+
+// 初始化编辑表格数据的表单
+const initEditDataForm = (row) => {
+    editRow = row;
+    editDataForm.id = editRow.id;
+    editDataForm.name = editRow.name;
+
+    // TODO 获取数据库中状态 id 与状态名称的关系
+    if(editRow.status === '进行中') {
+        editDataForm.status = 1;
+    } else if (editRow.status === '已完成') {
+        editDataForm.status = 2;
+    }
+
+    dialogEditDataFormVisible.value = true;
+}
+
+// 编辑表格数据
+const editData = () => {
+    // 本地更新表格数据
+    editRow.name = editDataForm.name;
+
+    // TODO 获取数据库中状态 id 与状态名称的关系
+    if(editDataForm.status === 1) {
+        editRow.status = '进行中';
+    } else if (editDataForm.status === 2) {
+        editRow.status = '已完成';
+    }
+
+    axios.post('http://127.0.0.1:8080/testData/updateNameAndStatus', {
+        id: editDataForm.id,
+        name: editDataForm.name,
+        status: editDataForm.status
+    })
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log('edit ' + response.data + ' row');
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        .then(function () {
+            dialogEditDataFormVisible.value = false;
+        });
+}
+
+// 编辑表格数据确认
+const checkEditData = () => {
+    ElMessageBox.confirm(
+        '确认编辑？',
+        '警告',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(() => {
+            editData();
+            ElMessage({
+                type: 'success',
+                message: '编辑成功',
             });
         })
         .catch(() => {
@@ -164,7 +244,11 @@ getTableData();
             </el-table-column>
             <el-table-column label="操作" prop align="center">
                 <template #default="scope">
-                    <el-button type="primary" size="small">编辑</el-button>
+                    <el-button
+                        type="primary"
+                        size="small"
+                        @click="initEditDataForm(scope.row)"
+                    >编辑</el-button>
                     <el-button
                         type="danger"
                         size="small"
@@ -185,7 +269,6 @@ getTableData();
             </el-form-item>
             <el-form-item label="日期">
                 <el-date-picker
-                    class="test"
                     v-model="insertDataForm.date"
                     type="datetime"
                     value-format="YYYY-MM-DD HH:mm:ss"
@@ -200,6 +283,26 @@ getTableData();
             </span>
         </template>
     </el-dialog>
+
+    <el-dialog v-model="dialogEditDataFormVisible" title="编辑数据" width="25%">
+        <el-form class="dialog-edit-data-form" :model="editDataForm">
+            <el-form-item label="名称">
+                <el-input v-model="editDataForm.name" />
+            </el-form-item>
+            <el-form-item label="状态">
+                <el-radio-group v-model="editDataForm.status">
+                    <el-radio :label="1">进行中</el-radio>
+                    <el-radio :label="2">已完成</el-radio>
+                </el-radio-group>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-edit-data-footer">
+                <el-button @click="dialogEditDataFormVisible = false">取消</el-button>
+                <el-button type="primary" @click="checkEditData">确认</el-button>
+            </span>
+        </template>
+    </el-dialog>
 </template>
 
 <style scoped>
@@ -211,9 +314,5 @@ getTableData();
 .table-container {
     width: 80%;
     margin: 10px auto;
-}
-
-.test {
-    width: 300px;
 }
 </style>
