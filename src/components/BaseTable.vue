@@ -10,6 +10,9 @@ import {
 
 // 表格信息
 const tableData = ref([]);
+const tableDataLength = ref(0);
+const pageSize = ref(12);
+const currentPage = ref(1);
 
 // 获取表格信息
 const getTableData = () => {
@@ -38,8 +41,16 @@ const formatTableData = (tableDataTemp) => {
         }
     }
 
+    // 格式化表格分页信息
     tableData.value = tableDataTemp;
+    tableDataLength.value = tableDataTemp.length;
+    currentPage.value = 1;
 };
+
+// 格式化表格序号
+const formatTableIndex = (index) => {
+    return (index + 1) + (currentPage.value - 1) * pageSize.value;
+}
 
 // 删除表格指定行
 const deleteTableRow = (rowIndex, rowId) => {
@@ -157,7 +168,7 @@ const initEditDataForm = (row) => {
     editDataForm.name = editRow.name;
 
     // TODO 获取数据库中状态 id 与状态名称的关系
-    if(editRow.status === '进行中') {
+    if (editRow.status === '进行中') {
         editDataForm.status = 1;
     } else if (editRow.status === '已完成') {
         editDataForm.status = 2;
@@ -172,7 +183,7 @@ const editData = () => {
     editRow.name = editDataForm.name;
 
     // TODO 获取数据库中状态 id 与状态名称的关系
-    if(editDataForm.status === 1) {
+    if (editDataForm.status === 1) {
         editRow.status = '进行中';
     } else if (editDataForm.status === 2) {
         editRow.status = '已完成';
@@ -228,9 +239,17 @@ getTableData();
         <el-button type="primary" :icon="Plus" circle @click="dialogInsertDataFormVisible = true"></el-button>
         <el-button type="success" :icon="Refresh" circle @click="getTableData"></el-button>
     </div>
+    
     <div class="table-container">
-        <el-table class="table-content" :data="tableData" border stripe height="535">
-            <el-table-column label="序号" type="index" width="60" align="center"></el-table-column>
+        
+        <el-table
+            class="table-content"
+            :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
+            border
+            stripe
+            height="537"
+        >
+            <el-table-column label="序号" type="index" :index="formatTableIndex" width="60" align="center"></el-table-column>
             <el-table-column label="编号" prop="id"></el-table-column>
             <el-table-column label="名称" prop="name"></el-table-column>
             <el-table-column label="日期" prop="date"></el-table-column>
@@ -244,11 +263,7 @@ getTableData();
             </el-table-column>
             <el-table-column label="操作" prop align="center">
                 <template #default="scope">
-                    <el-button
-                        type="primary"
-                        size="small"
-                        @click="initEditDataForm(scope.row)"
-                    >编辑</el-button>
+                    <el-button type="primary" size="small" @click="initEditDataForm(scope.row)">编辑</el-button>
                     <el-button
                         type="danger"
                         size="small"
@@ -257,10 +272,16 @@ getTableData();
                 </template>
             </el-table-column>
         </el-table>
+        <el-pagination
+            background
+            layout="prev, pager, next"
+            hide-on-single-page
+            :page-size="pageSize"
+            v-model:current-page="currentPage"
+            :total="tableDataLength"
+        />
+        
     </div>
-    <!-- <div class="table-pagination">
-        <el-button>分页预留</el-button>
-    </div>-->
 
     <el-dialog v-model="dialogInsertDataFormVisible" title="添加数据" width="25%">
         <el-form class="dialog-insert-data-form" :model="insertDataForm">
