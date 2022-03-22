@@ -1,6 +1,7 @@
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from "element-plus";
 import axios from 'axios'
 
 // do not use same name with ref
@@ -19,7 +20,7 @@ const onSubmit = () => {
             password: form.password
         }
     }).then(function (response) {
-        if (response.data.status === 'success') {
+        if (response.data !== 'error') {
             // TEST 控制台输出提示
             console.log('success')
 
@@ -28,6 +29,8 @@ const onSubmit = () => {
         } else {
             // TEST 控制台输出提示
             console.log('authentication error')
+
+            ElMessage.error('用户名或密码错误！')
         }
     }).catch(function (error) {
         console.log(error);
