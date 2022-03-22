@@ -54,6 +54,7 @@ const onSubmit = () => {
                 :model="form"
                 label-position="left"
                 label-width="60px"
+                @keyup.enter.native="onSubmit"
             >
                 <el-form-item class="label-text" label="用户名">
                     <el-input class="input-area" v-model="form.name" placeholder="请输入用户名"></el-input>
