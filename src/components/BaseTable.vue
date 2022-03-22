@@ -33,7 +33,7 @@ const getTableData = () => {
 // 格式化表格信息
 const formatTableData = (tableDataTemp) => {
     for (let i = 0; i < tableDataTemp.length; i++) {
-        // TODO 获取数据库中状态 id 与状态名称的关系
+        // TODO: 获取数据库中状态 id 与状态名称的关系
         if (tableDataTemp[i].status === 1) {
             tableDataTemp[i].status = '进行中';
         } else if (tableDataTemp[i].status === 2) {
@@ -120,7 +120,7 @@ const insertData = () => {
             console.log(error);
         })
         .then(function () {
-            // TODO 刷新表格时会重复访问数据库，注意性能问题
+            // TODO: 刷新表格时会重复访问数据库，注意性能问题
             getTableData();
             dialogInsertDataFormVisible.value = false;
         });
@@ -167,7 +167,7 @@ const initEditDataForm = (row) => {
     editDataForm.id = editRow.id;
     editDataForm.name = editRow.name;
 
-    // TODO 获取数据库中状态 id 与状态名称的关系
+    // TODO: 获取数据库中状态 id 与状态名称的关系
     if (editRow.status === '进行中') {
         editDataForm.status = 1;
     } else if (editRow.status === '已完成') {
@@ -182,7 +182,7 @@ const editData = () => {
     // 本地更新表格数据
     editRow.name = editDataForm.name;
 
-    // TODO 获取数据库中状态 id 与状态名称的关系
+    // TODO: 获取数据库中状态 id 与状态名称的关系
     if (editDataForm.status === 1) {
         editRow.status = '进行中';
     } else if (editDataForm.status === 2) {
