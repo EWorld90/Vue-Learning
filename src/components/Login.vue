@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from "element-plus";
 import axios from 'axios'
 
-// do not use same name with ref
+// 登录表单
 const form = reactive({
     name: '',
     password: '',
@@ -76,10 +76,6 @@ const onSubmit = () => {
 </template>
 
 <style scoped>
-/* * {
-    margin: 0;
-    padding: 0;
-} */
 .login-panel {
     position: relative;
     width: 100%;
