@@ -7,7 +7,7 @@ const avatarUrl = ref(avatar);
 
 const avatarSize = ref(60);
 
-const username = ref(localStorage.getItem('username'));
+const userName = ref(localStorage.getItem('userName'));
 </script>
 
 <template>
@@ -15,7 +15,7 @@ const username = ref(localStorage.getItem('username'));
         <div class="user-avatar">
             <el-avatar :size="avatarSize" :src="avatarUrl" alt="User"></el-avatar>
         </div>
-        <div class="user-info">{{ username }}</div>
+        <div class="user-info">{{ userName }}</div>
     </el-card>
 </template>
 

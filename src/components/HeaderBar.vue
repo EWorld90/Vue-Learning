@@ -7,10 +7,12 @@ const route = useRoute();
 const activeIndex = ref(route.path);
 
 const handleSelect = (index, indexPath) => {
-    // TEST 测试删除用户登录缓存
+    // 前往 login 页面时删除用户登录状态
     if (index === '/login') {
-        localStorage.removeItem('username');
-    }
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userPermission');
+        localStorage.removeItem('userLoginTime');
+        }
 }
 </script>
 

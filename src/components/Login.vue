@@ -1,8 +1,9 @@
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from "element-plus";
+import { ElMessage } from "element-plus"
 import axios from 'axios'
+import md5 from 'js-md5'
 
 // 登录表单
 const form = reactive({
@@ -14,33 +15,31 @@ const router = useRouter()
 
 const onSubmit = () => {
     const url = 'http://127.0.0.1:8080/login'
+    // 对密码进行加盐 md5 加密
+    const salt = Math.round(Math.random() * 1000);
     axios.get(url, {
         params: {
             name: form.name,
-            password: form.password
+            password: md5(form.password + salt),
+            salt: salt
         }
     }).then(function (response) {
-        if (response.data !== 'error') {
+        if (response.data.id !== undefined) {
             // TEST 控制台输出提示
             console.log('success')
 
-            localStorage.setItem('username', form.name);
+            localStorage.setItem('userName', response.data.name)
+            localStorage.setItem('userPermission', response.data.permission)
+            localStorage.setItem('userLoginTime', Date.parse(new Date()) / 1000)
+            
             router.push('/basetable')
+            ElMessage.success('登录成功')
         } else {
-            // TEST 控制台输出提示
-            console.log('authentication error')
-
-            ElMessage.error('用户名或密码错误！')
+            ElMessage.error(response.data)
         }
     }).catch(function (error) {
         console.log(error);
-        // TEST 控制台输出提示
-        console.log('server error')
-        // TEST 后端连接失败时也可登录
-        if (form.name === 'admin' && form.password === '123456') {
-            console.log('success')
-            router.push('/basetable')
-        }
+        ElMessage.error('连接服务器失败，请稍后再试')
     })
 }
 </script>
