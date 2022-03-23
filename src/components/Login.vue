@@ -1,9 +1,10 @@
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from "element-plus";
 import axios from 'axios'
 
-// do not use same name with ref
+// 登录表单
 const form = reactive({
     name: '',
     password: '',
@@ -19,7 +20,7 @@ const onSubmit = () => {
             password: form.password
         }
     }).then(function (response) {
-        if (response.data.status === 'success') {
+        if (response.data !== 'error') {
             // TEST 控制台输出提示
             console.log('success')
 
@@ -28,6 +29,8 @@ const onSubmit = () => {
         } else {
             // TEST 控制台输出提示
             console.log('authentication error')
+
+            ElMessage.error('用户名或密码错误！')
         }
     }).catch(function (error) {
         console.log(error);
@@ -51,6 +54,7 @@ const onSubmit = () => {
                 :model="form"
                 label-position="left"
                 label-width="60px"
+                @keyup.enter.native="onSubmit"
             >
                 <el-form-item class="label-text" label="用户名">
                     <el-input class="input-area" v-model="form.name" placeholder="请输入用户名"></el-input>
@@ -72,10 +76,6 @@ const onSubmit = () => {
 </template>
 
 <style scoped>
-/* * {
-    margin: 0;
-    padding: 0;
-} */
 .login-panel {
     position: relative;
     width: 100%;

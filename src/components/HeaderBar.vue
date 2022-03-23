@@ -25,10 +25,11 @@ const handleSelect = (index, indexPath) => {
         router
         @select="handleSelect"
     >
-        <span class="top-bar-label">测试管理系统</span>
-        <el-menu-item index="/basetable">Table</el-menu-item>
+        <span class="top-bar-label">课题数据管理系统</span>
+        <el-menu-item index="/basetable">课题列表</el-menu-item>
+        <el-menu-item>支出明细</el-menu-item>
+        <el-menu-item index="/baseusercenter">用户中心</el-menu-item>
         <el-menu-item index="/login">Login</el-menu-item>
-        <el-menu-item index="/baseusercenter">User Center</el-menu-item>
     </el-menu>
 </template>
 
@@ -40,7 +41,7 @@ const handleSelect = (index, indexPath) => {
 .top-bar-label {
     text-align: center;
     line-height: 58px;
-    width: 160px;
+    width: 180px;
     color: lightseagreen;
 }
 </style>

@@ -48,7 +48,7 @@ router.beforeEach((to, from, next) => {
     // TEST test页面无视导航守卫
     if (to.path === '/test') {
         // TEST 控制台输出提示
-        console.log(to.path);
+        console.log('test page ' + to.path);
 
         next();
     } else if (!username && to.path !== '/login') {
