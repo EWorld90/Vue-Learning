@@ -65,3 +65,5 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
+
+// TODO: 路由懒加载配置
