@@ -6,13 +6,15 @@ import { useRoute } from 'vue-router'
 const route = useRoute();
 const activeIndex = ref(route.path);
 
+const userName = ref(localStorage.getItem('userName'))
+
 const handleSelect = (index, indexPath) => {
     // 前往 login 页面时删除用户登录状态
     if (index === '/login') {
         localStorage.removeItem('userName');
         localStorage.removeItem('userPermission');
         localStorage.removeItem('userLoginTime');
-        }
+    }
 }
 </script>
 
@@ -28,10 +30,14 @@ const handleSelect = (index, indexPath) => {
         @select="handleSelect"
     >
         <span class="top-bar-label">课题数据管理系统</span>
-        <el-menu-item index="/basetable">课题列表</el-menu-item>
-        <el-menu-item>支出明细</el-menu-item>
+        <el-menu-item index="/basetable">测试表格</el-menu-item>
+        <el-menu-item index="">课题列表</el-menu-item>
+        <el-menu-item index="">支出明细</el-menu-item>
         <el-menu-item index="/baseusercenter">用户中心</el-menu-item>
-        <el-menu-item index="/login">Login</el-menu-item>
+        <el-sub-menu index>
+            <template #title>{{ userName }}</template>
+            <el-menu-item index="/login">退出登录</el-menu-item>
+        </el-sub-menu>
     </el-menu>
 </template>
 
