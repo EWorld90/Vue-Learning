@@ -75,7 +75,7 @@ router.beforeEach((to, from, next) => {
         next('/login');
     }
     // 如果在登录状态前往登录页面，则跳转回主页
-    else if (to.path === '/login') {
+    else if (userName && !isExpiration() && to.path === '/login') {
         next('/basetable')
     } 
     else {
