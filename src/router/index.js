@@ -60,7 +60,7 @@ router.beforeEach((to, from, next) => {
         // TEST 控制台输出提示
         console.log(to.path + " but not logged in, goto login");
 
-        next("/login");
+        next('/login');
     }
     // 检查用户登录状态是否过期
     else if (isExpiration() && to.path !== "/login") {
@@ -72,8 +72,13 @@ router.beforeEach((to, from, next) => {
         localStorage.removeItem('userPermission');
         localStorage.removeItem('userLoginTime');
 
-        next("/login");
-    } else {
+        next('/login');
+    }
+    // 如果在登录状态前往登录页面，则跳转回主页
+    else if (userName && !isExpiration() && to.path === '/login') {
+        next('/basetable')
+    } 
+    else {
         // TEST 控制台输出提示
         console.log(to.path);
 

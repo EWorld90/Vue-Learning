@@ -5,13 +5,13 @@ import { ElMessage } from "element-plus"
 import axios from 'axios'
 import md5 from 'js-md5'
 
+const router = useRouter()
+
 // 登录表单
 const form = reactive({
     name: '',
     password: '',
 })
-
-const router = useRouter()
 
 const onSubmit = () => {
     const url = 'http://127.0.0.1:8080/login'
@@ -31,7 +31,7 @@ const onSubmit = () => {
             localStorage.setItem('userName', response.data.name)
             localStorage.setItem('userPermission', response.data.permission)
             localStorage.setItem('userLoginTime', Date.parse(new Date()) / 1000)
-            
+
             router.push('/basetable')
             ElMessage.success('登录成功')
         } else {
