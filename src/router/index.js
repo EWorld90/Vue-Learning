@@ -1,37 +1,49 @@
 import { createRouter, createWebHistory } from "vue-router";
 
+// 懒加载路由
+const loginRoute = () => import('../components/Login.vue')
+const homeRoute = () => import('../components/Home.vue')
+const taskTableRoute = () => import('../components/TaskTable.vue')
+
+const testRoute = () => import('../test/Test.vue')
+
 const routes = [
     {
-        path: "/login",
-        name: "Login",
-        component: () => import("../components/Login.vue"),
+        path: '/login',
+        name: 'Login',
+        component: loginRoute
     },
     {
-        path: "/home",
-        name: "Home",
-        component: () => import("../components/Home.vue"),
+        path: '/home',
+        name: 'Home',
+        component: homeRoute,
         children: [
+            {
+                path: '/tasktable',
+                name: 'TaskTable',
+                component: taskTableRoute
+            },
             {
                 path: "/basetable",
                 name: "BaseTable",
-                component: () => import("../components/BaseTable.vue"),
+                component: () => import("../components/basetable.vue"),
             },
             {
                 path: "/baseusercenter",
                 name: "BaseUserCenter",
-                component: () => import("../components/BaseUserCenter.vue"),
+                component: () => import("../components/baseusercenter.vue"),
             },
         ],
     },
     {
-        path: "/",
-        redirect: "/basetable",
+        path: '/',
+        redirect: '/basetable',
     },
     // TEST 测试界面路由入口
     {
-        path: "/test",
-        name: "Test",
-        component: () => import("../test/Test.vue"),
+        path: '/test',
+        name: 'Test',
+        component: testRoute,
     },
 ];
 
@@ -49,21 +61,21 @@ router.beforeEach((to, from, next) => {
     userLoginTime = localStorage.getItem('userLoginTime')
 
     // TEST test页面无视导航守卫
-    if (to.path === "/test") {
+    if (to.path === '/test') {
         // TEST 控制台输出提示
-        console.log("goto test page");
+        console.log('goto test page');
 
         next();
     }
     // 检查用户是否登录
-    else if (!userName && to.path !== "/login") {
+    else if (!userName && to.path !== '/login') {
         // TEST 控制台输出提示
         console.log(to.path + " but not logged in, goto login");
 
         next('/login');
     }
     // 检查用户登录状态是否过期
-    else if (isExpiration() && to.path !== "/login") {
+    else if (isExpiration() && to.path !== '/login') {
         // TEST 控制台输出提示
         console.log(to.path + " but login expire, goto login");
 
@@ -76,7 +88,7 @@ router.beforeEach((to, from, next) => {
     }
     // 如果在登录状态前往登录页面，则跳转回主页
     else if (userName && !isExpiration() && to.path === '/login') {
-        next('/basetable')
+        next('/')
     } 
     else {
         // TEST 控制台输出提示
@@ -93,5 +105,3 @@ const isExpiration = () => {
 }
 
 export default router;
-
-// TODO: 路由懒加载配置
