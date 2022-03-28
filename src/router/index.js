@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from "vue-router";
 const loginRoute = () => import('../components/Login.vue')
 const homeRoute = () => import('../components/Home.vue')
 const taskTableRoute = () => import('../components/TaskTable.vue')
+const expenseTableRoute = () => import('../components/ExpenseTable.vue')
 
 const testRoute = () => import('../test/Test.vue')
 
@@ -22,6 +23,11 @@ const routes = [
                 path: '/tasktable',
                 name: 'TaskTable',
                 component: taskTableRoute
+            },
+            {
+                path: '/expensetable',
+                name: 'ExpenseTable',
+                component: expenseTableRoute
             },
             {
                 path: "/basetable",

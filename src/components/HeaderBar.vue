@@ -32,7 +32,7 @@ const handleSelect = (index, indexPath) => {
         <span class="top-bar-label">课题数据管理系统</span>
         <el-menu-item index="/basetable">测试表格</el-menu-item>
         <el-menu-item index="/tasktable">课题列表</el-menu-item>
-        <el-menu-item index="/">支出明细</el-menu-item>
+        <el-menu-item index="/expensetable">支出明细</el-menu-item>
         <el-menu-item index="/baseusercenter">用户中心</el-menu-item>
         <el-sub-menu index>
             <template #title>{{ userName }}</template>
