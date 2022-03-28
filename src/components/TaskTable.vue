@@ -48,6 +48,11 @@ const formatTableData = (data) => {
     tableDataLength.value = data.length
 }
 
+// 格式化表格序号
+const formatTableIndex = (index) => {
+    return (index + 1) + (currentPage.value - 1) * pageSize.value;
+}
+
 // 详情对话框信息
 const detailDialog = reactive({
     isVisible: false,
@@ -110,8 +115,8 @@ getTableData()
     <!-- 表格主体 -->
     <div class="table-container">
         <el-table border stripe size="small" height="529" :data="sliceTableData()">
-            <el-table-column label="序号" type="index" width="60" align="center"></el-table-column>
-            <el-table-column label="课题号" prop="taskIndex"></el-table-column>
+            <el-table-column label="序号" type="index" :index="formatTableIndex" width="60" align="center"></el-table-column>
+            <el-table-column label="课题编号" prop="taskIndex"></el-table-column>
             <el-table-column label="课题名" prop="taskName"></el-table-column>
             <el-table-column label="起始日期" prop="taskStartDate"></el-table-column>
             <el-table-column label="截止日期" prop="taskEndDate"></el-table-column>
