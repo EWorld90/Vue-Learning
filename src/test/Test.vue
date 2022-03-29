@@ -53,7 +53,7 @@ const formatTableData = async (data) => {
             d.taskLeaderUserId = res
         })
     }
-    
+
     // 修改状态类别 id 为状态类别 name
     await getStatusTypeName()
     for (let d of data) {
@@ -71,6 +71,19 @@ const formatTableData = async (data) => {
 // 格式化表格序号
 const formatTableIndex = (index) => {
     return (index + 1) + (currentPage.value - 1) * pageSize.value;
+}
+
+// 美化表格的状态类别一栏
+const beautifyStatus = (statusName) => {
+    if (statusName === '进行中') {
+        return 'warning'
+    } else if (statusName === '已完成') {
+        return 'success'
+    }
+
+    else {
+        return ''
+    }
 }
 
 // 详情对话框信息
@@ -106,7 +119,7 @@ const getTaskDetail = async (taskId) => {
         .catch(function (error) {
             console.log(error)
         })
-    
+
     // 修改开支类别 id 为开支类别 name
     await getExpenseTypeName()
     for (let d of data) {
@@ -178,7 +191,7 @@ const getExpenseTypeName = async (id) => {
         .catch(function (error) {
             console.log(error)
         })
-    
+
     for (const d of data) {
         expenseTypeList.set(d.id, d.expenseName)
     }
@@ -199,7 +212,7 @@ const getStatusTypeName = async (id) => {
         .catch(function (error) {
             console.log(error)
         })
-    
+
     for (const d of data) {
         statusTypeList.set(d.id, d.statusName)
     }
@@ -233,11 +246,17 @@ getTableData()
             <el-table-column label="负责人" prop="taskLeaderUserId"></el-table-column>
             <el-table-column label="预算" prop="taskBudget"></el-table-column>
             <el-table-column label="结余" prop="taskBalance"></el-table-column>
-            <el-table-column label="状态" prop="taskStatusId"></el-table-column>
+            <el-table-column label="状态" prop="taskStatusId" align="center">
+                <template #default="scope">
+                    <el-tag
+                        :type="beautifyStatus(scope.row.taskStatusId)"
+                    >{{ scope.row.taskStatusId }}</el-tag>
+                </template>
+            </el-table-column>
             <el-table-column label="操作" prop align="center" width="200">
                 <template #default="scope">
                     <el-button type="success" size="small" @click="openDetailDialog(scope.row)">详情</el-button>
-                    <el-button type="primary" size="small" @click="test(scope.row)">编辑</el-button>
+                    <el-button type="primary" size="small">编辑</el-button>
                     <el-button type="danger" size="small">删除</el-button>
                 </template>
             </el-table-column>
