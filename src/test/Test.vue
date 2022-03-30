@@ -11,6 +11,7 @@ import {
 // 表格信息
 const tableData = ref([]);
 const tableDataLength = ref(0)
+const tableLoading = ref(true)
 
 // 各项 id 与 name 的对应 Map
 let userList = new Map()
@@ -43,6 +44,8 @@ const getTableData = async () => {
         })
 
     await formatTableData(data)
+
+    tableLoading.value = false
 }
 
 // 格式化表格信息
@@ -231,7 +234,7 @@ getTableData()
 
     <!-- 表格主体 -->
     <div class="table-container">
-        <el-table border stripe size="small" height="529" :data="sliceTableData()">
+        <el-table border stripe size="small" height="529" :data="sliceTableData()" v-loading="tableLoading">
             <el-table-column
                 label="序号"
                 type="index"
@@ -282,6 +285,11 @@ getTableData()
             <el-table-column label="类别预算" prop="expenseTypeBudget"></el-table-column>
             <el-table-column label="类别结余" prop="expenseTypeBalance"></el-table-column>、
         </el-table>
+    </el-dialog>
+
+    <!-- 添加对话框 -->
+    <el-dialog>
+
     </el-dialog>
 </template>
 
