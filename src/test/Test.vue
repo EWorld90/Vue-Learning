@@ -2,6 +2,7 @@
 import { ref, reactive, toRaw } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import axios from 'axios'
+import Decimal from 'decimal.js'
 
 import {
     Refresh,
@@ -14,9 +15,12 @@ const tableDataLength = ref(0)
 const tableLoading = ref(true)
 
 // 各项 id 与 name 的对应 Map
-let userList = new Map()
-let expenseTypeList = new Map()
-let statusTypeList = new Map()
+let userMap = new Map()
+let expenseTypeMap = new Map()
+let statusTypeMap = new Map()
+
+// 各项 id 与 name 的对应 Array
+let userArray = ref([])
 
 // 分页信息
 const pageSize = ref(15)
@@ -60,7 +64,7 @@ const formatTableData = async (data) => {
     // 修改状态类别 id 为状态类别 name
     await getStatusTypeName()
     for (let d of data) {
-        d.taskStatusId = statusTypeList.get(d.taskStatusId)
+        d.taskStatusId = statusTypeMap.get(d.taskStatusId)
     }
 
     // 向表格填入信息
@@ -126,7 +130,7 @@ const getTaskDetail = async (taskId) => {
     // 修改开支类别 id 为开支类别 name
     await getExpenseTypeName()
     for (let d of data) {
-        d.expenseTypeId = expenseTypeList.get(d.expenseTypeId)
+        d.expenseTypeId = expenseTypeMap.get(d.expenseTypeId)
     }
 
     detailDialog.tableData = data
@@ -159,10 +163,88 @@ const getTaskMember = async (taskId) => {
     }
 }
 
+// 添加对话框信息
+const addDialog = reactive({
+    isVisible: false,
+})
+
+// 添加表单信息
+const addForm = reactive({
+    taskIndex: '',
+    taskName: '',
+    taskDate: '',
+    taskLeaderUserId: '',
+    taskBudget: '',
+})
+
+// 添加对话框初始化
+const openAddDialog = () => {
+    // 清除表单数据
+    for (const key of Object.keys(addForm)) {
+        addForm[key] = ''
+    }
+
+    getAllUserName()
+
+    addDialog.isVisible = true
+}
+
+// 确认提交添加表单的操作
+const checkSubmitAddForm = () => {
+    // TODO: 表单验证功能
+
+    ElMessageBox.confirm(
+        '确认添加？',
+        '警告',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(async () => {
+            await submitAddForm()
+            ElMessage({
+                type: 'success',
+                message: '添加成功',
+            })
+            addDialog.isVisible = false
+        })
+        .catch(() => {
+            ElMessage({
+                type: 'info',
+                message: '已取消',
+                duration: 1000,
+            })
+        })
+}
+
+// 提交添加表单
+const submitAddForm = async () => {
+    axios.post('http://127.0.0.1:8080/taskData/save', {
+        taskIndex: addForm.taskIndex,
+        taskName: addForm.taskName,
+        taskStartDate: addForm.taskDate[0],
+        taskEndDate: addForm.taskDate[1],
+        taskLeaderUserId: addForm.taskLeaderUserId,
+        taskBudget: Decimal(addForm.taskBudget).toNumber(),
+        taskBalance: Decimal(addForm.taskBudget).toNumber(),
+        taskStatusId: 1
+    })
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log('Post task data ok!')
+            console.log(response.data)
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+}
+
 // 获取用户 id 对应的用户 name，函数会返回用户 name
 const getUserName = async (id) => {
-    if (userList.get(id)) {
-        return userList.get(id)
+    if (userMap.get(id)) {
+        return userMap.get(id)
     } else {
         await axios.get('http://127.0.0.1:8080/user/getNameById?id=' + id)
             .then(function (response) {
@@ -170,13 +252,29 @@ const getUserName = async (id) => {
                 console.log('Get user name ok!')
                 console.log(response.data)
 
-                userList.set(id, response.data.name)
+                userMap.set(id, response.data.name)
             })
             .catch(function (error) {
                 console.log(error)
             })
-        return userList.get(id)
+        return userMap.get(id)
     }
+}
+
+// 获取全部用户的 id 与对应的 name，并本地保存
+const getAllUserName = () => {
+    axios.get('http://127.0.0.1:8080/user/listAll')
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log('Get user list ok!')
+            console.log(response.data)
+
+            // data = response.data
+            userArray.value = response.data
+        })
+        .catch(function (error) {
+            console.log(error)
+        })
 }
 
 // 获取开支类别 id 对应的开支类别 name，并本地保存
@@ -196,7 +294,7 @@ const getExpenseTypeName = async (id) => {
         })
 
     for (const d of data) {
-        expenseTypeList.set(d.id, d.expenseName)
+        expenseTypeMap.set(d.id, d.expenseName)
     }
 }
 
@@ -217,7 +315,7 @@ const getStatusTypeName = async (id) => {
         })
 
     for (const d of data) {
-        statusTypeList.set(d.id, d.statusName)
+        statusTypeMap.set(d.id, d.statusName)
     }
 }
 
@@ -228,13 +326,20 @@ getTableData()
 <template>
     <!-- 表格组件 -->
     <div class="table-functions">
-        <el-button type="primary" :icon="Plus" circle></el-button>
+        <el-button type="primary" :icon="Plus" circle @click="openAddDialog"></el-button>
         <el-button type="success" :icon="Refresh" circle @click="getTableData"></el-button>
     </div>
 
     <!-- 表格主体 -->
     <div class="table-container">
-        <el-table border stripe size="small" height="529" :data="sliceTableData()" v-loading="tableLoading">
+        <el-table
+            border
+            stripe
+            size="small"
+            height="531"
+            :data="sliceTableData()"
+            v-loading="tableLoading"
+        >
             <el-table-column
                 label="序号"
                 type="index"
@@ -274,7 +379,7 @@ getTableData()
     </div>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialog.isVisible">
+    <el-dialog v-model="detailDialog.isVisible" width="40%">
         <template #title>{{ detailDialog.title }} 详情栏</template>
         <el-card class="detail-dialog-card" shadow="never">
             <template #header>课题成员</template>
@@ -288,8 +393,43 @@ getTableData()
     </el-dialog>
 
     <!-- 添加对话框 -->
-    <el-dialog>
-
+    <el-dialog v-model="addDialog.isVisible" title="添加新课题" width="40%">
+        <el-form :model="addForm" label-position="left" label-width="100px">
+            <el-form-item label="课题编号" prop="taskIndex">
+                <el-input v-model="addForm.taskIndex" type="text" clearable></el-input>
+            </el-form-item>
+            <el-form-item label="课题名" prop="taskName">
+                <el-input v-model="addForm.taskName" type="text" clearable></el-input>
+            </el-form-item>
+            <el-form-item label="日期" prop="taskDate">
+                <el-date-picker
+                    v-model="addForm.taskDate"
+                    type="daterange"
+                    unlink-panels
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    clearable
+                    style="width:100%"
+                ></el-date-picker>
+            </el-form-item>
+            <el-form-item label="负责人" prop="taskLeaderUserId">
+                <el-select v-model="addForm.taskLeaderUserId" placeholder="请选择">
+                    <el-option
+                        v-for="user in userArray"
+                        :key="user.id"
+                        :value="user.id"
+                        :label="user.name"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="预算" prop="taskBudget">
+                <el-input v-model="addForm.taskBudget" type="text" clearable></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="checkSubmitAddForm">提交</el-button>
+                <el-button @click="addDialog.isVisible = false">关闭</el-button>
+            </el-form-item>
+        </el-form>
     </el-dialog>
 </template>
 
@@ -306,5 +446,9 @@ getTableData()
 .detail-dialog-card {
     text-align: left;
     margin-bottom: 10px;
+}
+.add-form-date-separator {
+    height: 100%;
+    line-height: 28px;
 }
 </style>
