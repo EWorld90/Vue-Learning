@@ -30,7 +30,7 @@ const currentPage = ref(1)
 
 // 分页处理
 const sliceTableData = () => {
-    return toRaw(tableData.value).slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
+    return tableData.value.slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 }
 
 // 获取全部表格信息
@@ -301,6 +301,34 @@ const checkSubmitEditTaskDataForm = () => {
 
 const submitEditTaskDataForm = () => {
     console.log('Submit edit task data test ok')
+    editTaskDataDialog.isVisible = false
+}
+
+// TODO: 删除指定的课题列表数据
+const checkDeleteTableRow = (index, row) => {
+    ElMessageBox.confirm(
+        '确认删除？',
+        '警告',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(() => {
+            DeleteTableRow(index, row)
+            ElMessage({
+                type: 'success',
+                message: '删除成功',
+            })
+        })
+        .catch(() => { })
+}
+
+const DeleteTableRow = (index, row) => {
+    tableData.value.splice(index, 1)
+
+    console.log('delete task data row ' + row.id + ' test ok')
 }
 
 // 获取用户 id 对应的用户 name，函数会返回用户 name
@@ -432,7 +460,7 @@ getTableData()
                 <template #default="scope">
                     <el-button type="success" size="small" @click="openDetailDialog(scope.row)">详情</el-button>
                     <el-button type="primary" size="small" @click="openEditDialog(scope.row)">编辑</el-button>
-                    <el-button type="danger" size="small">删除</el-button>
+                    <el-button type="danger" size="small" @click="checkDeleteTableRow(scope.$index, scope.row)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -559,8 +587,6 @@ getTableData()
     <!-- 编辑课题成员对话框 -->
 
     <!-- 编辑开支类别对话框 -->
-
-    <!-- 删除对话框 -->
 </template>
 
 <style scoped>
