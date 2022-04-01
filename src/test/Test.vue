@@ -304,6 +304,30 @@ const submitEditTaskDataForm = () => {
     editTaskDataDialog.isVisible = false
 }
 
+// 编辑课题成员对话框信息
+const editTaskMemberDialog = reactive({
+    isVisible: false,
+    memberData: [{
+        key: 1,
+        lable: 1,
+        disabled: false,
+    }, {
+        key: 2,
+        lable: 2,
+        disabled: false,
+    }, {
+        key: 3,
+        lable: 3,
+        disabled: false,
+    }],
+    selectedMember: [],
+})
+
+// 初始化编辑课题成员对话框
+const openEditTaskMemberDialog = () => {
+    editTaskMemberDialog.isVisible = true
+}
+
 // TODO: 删除指定的课题列表数据
 const checkDeleteTableRow = (index, row) => {
     ElMessageBox.confirm(
@@ -460,7 +484,11 @@ getTableData()
                 <template #default="scope">
                     <el-button type="success" size="small" @click="openDetailDialog(scope.row)">详情</el-button>
                     <el-button type="primary" size="small" @click="openEditDialog(scope.row)">编辑</el-button>
-                    <el-button type="danger" size="small" @click="checkDeleteTableRow(scope.$index, scope.row)">删除</el-button>
+                    <el-button
+                        type="danger"
+                        size="small"
+                        @click="checkDeleteTableRow(scope.$index, scope.row)"
+                    >删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -531,7 +559,7 @@ getTableData()
     <el-dialog v-model="editDialog.isVisible" title="编辑课题信息" width="20%">
         <el-space direction="vertical">
             <el-button @click="openEditTaskDataDialog">编辑课题信息</el-button>
-            <el-button>编辑课题成员</el-button>
+            <el-button @click="openEditTaskMemberDialog">编辑课题成员</el-button>
             <el-button>编辑开支类别</el-button>
         </el-space>
     </el-dialog>
@@ -585,6 +613,21 @@ getTableData()
     </el-dialog>
 
     <!-- 编辑课题成员对话框 -->
+    <el-dialog v-model="editTaskMemberDialog.isVisible" title="编辑课题成员" width="45%">
+        <el-transfer
+            v-model="editTaskMemberDialog.selectedMember"
+            :titles="['Source', 'Target']"
+            :button-texts="['添加', '删除']"
+            :data="editTaskMemberDialog.memberData"
+        >
+            <template #left-footer>
+                <el-button class="transfer-footer" size="small">Operation</el-button>
+            </template>
+            <template #right-footer>
+                <el-button class="transfer-footer" size="small">Operation</el-button>
+            </template>
+        </el-transfer>
+    </el-dialog>
 
     <!-- 编辑开支类别对话框 -->
 </template>

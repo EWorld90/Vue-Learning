@@ -21,6 +21,8 @@ let statusTypeMap = new Map()
 
 // 各项 id 与 name 的对应 Array
 let userArray = ref([])
+let expenseTypeArray = ref([])
+let statusTypeArray = ref([])
 
 // 分页信息
 const pageSize = ref(15)
@@ -28,7 +30,7 @@ const currentPage = ref(1)
 
 // 分页处理
 const sliceTableData = () => {
-    return toRaw(tableData.value).slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
+    return tableData.value.slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 }
 
 // 获取全部表格信息
@@ -101,7 +103,7 @@ const detailDialog = reactive({
     memberData: []
 })
 
-// 详情对话框初始化
+// 初始化详情对话框
 const openDetailDialog = (row) => {
     detailDialog.title = row.taskName
 
@@ -177,13 +179,14 @@ const addForm = reactive({
     taskBudget: '',
 })
 
-// 添加对话框初始化
+// 初始化添加对话框
 const openAddDialog = () => {
     // 清除表单数据
     for (const key of Object.keys(addForm)) {
         addForm[key] = ''
     }
 
+    // TODO: 获取用户列表时需要验证权限
     getAllUserName()
 
     addDialog.isVisible = true
@@ -239,6 +242,117 @@ const submitAddForm = async () => {
         .catch(function (error) {
             console.log(error);
         });
+}
+
+// 编辑对话框信息
+const editDialog = reactive({
+    isVisible: false,
+    editRow: null,
+})
+
+// 初始化编辑对话框
+const openEditDialog = (row) => {
+    editDialog.editRow = row
+
+    editDialog.isVisible = true
+}
+
+// 编辑课题信息对话框信息
+const editTaskDataDialog = reactive({
+    isVisible: false,
+})
+
+// 编辑课题信息对话框表格信息
+const editTaskDataForm = reactive({
+    taskIndex: '',
+    taskName: '',
+    taskDate: '',
+    taskLeaderUserId: '',
+    taskBudget: '',
+    taskStatusId: -1,
+})
+
+// 初始化编辑课题信息对话框
+const openEditTaskDataDialog = () => {
+    editTaskDataForm.taskIndex = editDialog.editRow.taskIndex
+    editTaskDataForm.taskName = editDialog.editRow.taskName
+    editTaskDataForm.taskDate = [editDialog.editRow.taskStartDate, editDialog.editRow.taskEndDate]
+    editTaskDataForm.taskLeaderUserId = editDialog.editRow.taskLeaderUserId
+    editTaskDataForm.taskBudget = editDialog.editRow.taskBudget
+
+    // 将状态类别 name 转换成 id
+    for (const s of statusTypeMap) {
+        if (editDialog.editRow.taskStatusId === s[1]) {
+            editTaskDataForm.taskStatusId = s[0]
+            break;
+        }
+    }
+
+    // TODO: 获取用户列表时需要验证权限
+    getAllUserName()
+
+    editTaskDataDialog.isVisible = true
+}
+
+// TODO: 提交编辑课题信息表单
+const checkSubmitEditTaskDataForm = () => {
+    submitEditTaskDataForm()
+}
+
+const submitEditTaskDataForm = () => {
+    console.log('Submit edit task data test ok')
+    editTaskDataDialog.isVisible = false
+}
+
+// 编辑课题成员对话框信息
+const editTaskMemberDialog = reactive({
+    isVisible: false,
+    memberData: [{
+        key: 1,
+        lable: 1,
+        disabled: false,
+    }, {
+        key: 2,
+        lable: 2,
+        disabled: false,
+    }, {
+        key: 3,
+        lable: 3,
+        disabled: false,
+    }],
+    selectedMember: [],
+})
+
+// 初始化编辑课题成员对话框
+const openEditTaskMemberDialog = () => {
+    editTaskMemberDialog.isVisible = true
+}
+
+// TODO: 删除指定的课题列表数据
+const checkDeleteTableRow = (index, row) => {
+    ElMessageBox.confirm(
+        '确认删除？',
+        '警告',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(() => {
+            DeleteTableRow(index, row)
+            ElMessage({
+                type: 'success',
+                message: '删除成功',
+            })
+        })
+        .catch(() => { })
+}
+
+const DeleteTableRow = (index, row) => {
+    tableData.value.splice(index, 1)
+
+    console.log('delete task data row ' + row.id + ' test ok')
 }
 
 // 获取用户 id 对应的用户 name，函数会返回用户 name
@@ -316,6 +430,11 @@ const getStatusTypeName = async (id) => {
 
     for (const d of data) {
         statusTypeMap.set(d.id, d.statusName)
+
+        // 将数据一同存入 Array 中
+        const id = d.id
+        const statusName = d.statusName
+        statusTypeArray.value.push({ id, statusName })
     }
 }
 
@@ -364,8 +483,12 @@ getTableData()
             <el-table-column label="操作" prop align="center" width="200">
                 <template #default="scope">
                     <el-button type="success" size="small" @click="openDetailDialog(scope.row)">详情</el-button>
-                    <el-button type="primary" size="small">编辑</el-button>
-                    <el-button type="danger" size="small">删除</el-button>
+                    <el-button type="primary" size="small" @click="openEditDialog(scope.row)">编辑</el-button>
+                    <el-button
+                        type="danger"
+                        size="small"
+                        @click="checkDeleteTableRow(scope.$index, scope.row)"
+                    >删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -431,6 +554,82 @@ getTableData()
             </el-form-item>
         </el-form>
     </el-dialog>
+
+    <!-- 编辑对话框 -->
+    <el-dialog v-model="editDialog.isVisible" title="编辑课题信息" width="20%">
+        <el-space direction="vertical">
+            <el-button @click="openEditTaskDataDialog">编辑课题信息</el-button>
+            <el-button @click="openEditTaskMemberDialog">编辑课题成员</el-button>
+            <el-button>编辑开支类别</el-button>
+        </el-space>
+    </el-dialog>
+
+    <!-- 编辑课题信息对话框 -->
+    <el-dialog v-model="editTaskDataDialog.isVisible" title="添加新课题" width="40%">
+        <el-form :model="editTaskDataForm" label-position="left" label-width="100px">
+            <el-form-item label="课题编号" prop="taskIndex">
+                <el-input v-model="editTaskDataForm.taskIndex" type="text" clearable></el-input>
+            </el-form-item>
+            <el-form-item label="课题名" prop="taskName">
+                <el-input v-model="editTaskDataForm.taskName" type="text" clearable></el-input>
+            </el-form-item>
+            <el-form-item label="日期" prop="taskDate">
+                <el-date-picker
+                    v-model="editTaskDataForm.taskDate"
+                    type="daterange"
+                    unlink-panels
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    clearable
+                    style="width:100%"
+                ></el-date-picker>
+            </el-form-item>
+            <el-form-item label="负责人" prop="taskLeaderUserId">
+                <el-select v-model="editTaskDataForm.taskLeaderUserId" placeholder="请选择">
+                    <el-option
+                        v-for="user in userArray"
+                        :key="user.id"
+                        :value="user.id"
+                        :label="user.name"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="预算" prop="taskBudget">
+                <el-input v-model="editTaskDataForm.taskBudget" type="text" clearable></el-input>
+            </el-form-item>
+            <el-form-item label="状态" prop="taskStatusId">
+                <el-radio-group v-model="editTaskDataForm.taskStatusId">
+                    <el-radio
+                        v-for="status in statusTypeArray"
+                        :label="status.id"
+                    >{{ status.statusName }}</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="checkSubmitEditTaskDataForm">提交</el-button>
+                <el-button @click="editTaskDataDialog.isVisible = false">关闭</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+
+    <!-- 编辑课题成员对话框 -->
+    <el-dialog v-model="editTaskMemberDialog.isVisible" title="编辑课题成员" width="45%">
+        <el-transfer
+            v-model="editTaskMemberDialog.selectedMember"
+            :titles="['Source', 'Target']"
+            :button-texts="['添加', '删除']"
+            :data="editTaskMemberDialog.memberData"
+        >
+            <template #left-footer>
+                <el-button class="transfer-footer" size="small">Operation</el-button>
+            </template>
+            <template #right-footer>
+                <el-button class="transfer-footer" size="small">Operation</el-button>
+            </template>
+        </el-transfer>
+    </el-dialog>
+
+    <!-- 编辑开支类别对话框 -->
 </template>
 
 <style scoped>
