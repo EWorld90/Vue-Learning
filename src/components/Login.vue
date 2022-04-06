@@ -24,22 +24,22 @@ const onSubmit = () => {
             salt: salt
         }
     }).then(function (response) {
-        if (response.data.id !== undefined) {
+        if (response.data.data.user !== null) {
             // TEST 控制台输出提示
             console.log('success')
 
-            localStorage.setItem('userName', response.data.name)
-            localStorage.setItem('userPermission', response.data.permission)
+            localStorage.setItem('userName', response.data.data.user.name)
+            localStorage.setItem('userPermission', response.data.data.user.permission)
             localStorage.setItem('userLoginTime', Date.parse(new Date()) / 1000)
 
             router.push('/basetable')
             ElMessage.success('登录成功')
         } else {
-            ElMessage.error(response.data)
+            ElMessage.error(response.data.data.status)
         }
     }).catch(function (error) {
         console.log(error);
-        ElMessage.error('连接服务器失败，请稍后再试')
+        ElMessage.error(response.data.data.status)
     })
 }
 </script>
