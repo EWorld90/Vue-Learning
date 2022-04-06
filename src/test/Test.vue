@@ -186,7 +186,7 @@ const openAddDialog = () => {
         addForm[key] = ''
     }
 
-    // TODO: 获取用户列表时需要验证权限
+    // TODO: 根据用户权限获取对应的用户列表
     getAllUserName()
 
     addDialog.isVisible = true
@@ -223,7 +223,7 @@ const checkSubmitAddForm = () => {
 }
 
 // 提交添加表单
-const submitAddForm = async () => {
+const submitAddForm = () => {
     axios.post('http://127.0.0.1:8080/taskData/save', {
         taskIndex: addForm.taskIndex,
         taskName: addForm.taskName,
@@ -288,7 +288,7 @@ const openEditTaskDataDialog = () => {
         }
     }
 
-    // TODO: 获取用户列表时需要验证权限
+    // TODO: 根据用户权限获取对应的用户列表
     getAllUserName()
 
     editTaskDataDialog.isVisible = true
@@ -296,12 +296,61 @@ const openEditTaskDataDialog = () => {
 
 // TODO: 提交编辑课题信息表单
 const checkSubmitEditTaskDataForm = () => {
-    submitEditTaskDataForm()
+    ElMessageBox.confirm(
+        '确认编辑？',
+        '警告',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    )
+        .then(() => {
+            submitEditTaskDataForm()
+
+            ElMessage({
+                type: 'success',
+                message: '编辑成功',
+            })
+
+            editTaskDataDialog.isVisible = false
+        })
+        .catch(() => { })
 }
 
 const submitEditTaskDataForm = () => {
-    console.log('Submit edit task data test ok')
-    editTaskDataDialog.isVisible = false
+    // 如果未修改负责人，需要转换表单中的负责人表单项格式
+    if (!Number.isNaN(editTaskDataForm.taskLeaderUserId)) {
+        for (const user of userArray.value) {
+            if (editTaskDataForm.taskLeaderUserId === user.name) {
+                editTaskDataForm.taskLeaderUserId = user.id
+                break
+            }
+        }
+    }
+
+    axios.post('http://127.0.0.1:8080/taskData/updateById', {
+        id: editDialog.editRow.id,
+        taskIndex: editTaskDataForm.taskIndex,
+        taskName: editTaskDataForm.taskName,
+        taskStartDate: editTaskDataForm.taskDate[0],
+        taskEndDate: editTaskDataForm.taskDate[1],
+        taskLeaderUserId: editTaskDataForm.taskLeaderUserId,
+        taskBudget: Decimal(editTaskDataForm.taskBudget).toNumber(),
+        taskBalance: Decimal(editTaskDataForm.taskBudget).toNumber(),
+        taskStatusId: editTaskDataForm.taskStatusId,
+    })
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log('Submit edit task data test ok')
+            console.log(response.data.data)
+
+            // 编辑后刷新一遍表格数据
+            getTableData()
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 }
 
 // 编辑课题成员对话框信息
@@ -428,6 +477,7 @@ const getStatusTypeName = async (id) => {
             console.log(error)
         })
 
+    statusTypeArray.value = []
     for (const d of data) {
         statusTypeMap.set(d.id, d.statusName)
 
@@ -617,7 +667,7 @@ getTableData()
         <el-transfer
             v-model="editTaskMemberDialog.selectedMember"
             :titles="['Source', 'Target']"
-            :button-texts="['添加', '删除']"
+            :button-texts="['删除', '添加']"
             :data="editTaskMemberDialog.memberData"
         >
             <template #left-footer>
