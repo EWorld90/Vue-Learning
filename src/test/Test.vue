@@ -41,9 +41,9 @@ const getTableData = async () => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get table data ok!')
-            console.log(response.data)
+            console.log(response.data.data)
 
-            data = response.data
+            data = response.data.data
         })
         .catch(function (error) {
             console.log(error)
@@ -121,9 +121,9 @@ const getTaskDetail = async (taskId) => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get table detail ok!')
-            console.log(response.data)
+            console.log(response.data.data)
 
-            data = response.data
+            data = response.data.data
         })
         .catch(function (error) {
             console.log(error)
@@ -149,9 +149,9 @@ const getTaskMember = async (taskId) => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get table member ok!')
-            console.log(response.data)
+            console.log(response.data.data)
 
-            data = response.data
+            data = response.data.data
         })
         .catch(function (error) {
             console.log(error)
@@ -237,7 +237,7 @@ const submitAddForm = async () => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Post task data ok!')
-            console.log(response.data)
+            console.log(response.data.data)
         })
         .catch(function (error) {
             console.log(error);
@@ -364,9 +364,9 @@ const getUserName = async (id) => {
             .then(function (response) {
                 // TEST 控制台输出提示
                 console.log('Get user name ok!')
-                console.log(response.data)
+                console.log(response.data.data)
 
-                userMap.set(id, response.data.name)
+                userMap.set(id, response.data.data.name)
             })
             .catch(function (error) {
                 console.log(error)
@@ -381,10 +381,10 @@ const getAllUserName = () => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get user list ok!')
-            console.log(response.data)
+            console.log(response.data.data)
 
-            // data = response.data
-            userArray.value = response.data
+            // data = response.data.data
+            userArray.value = response.data.data
         })
         .catch(function (error) {
             console.log(error)
@@ -399,9 +399,9 @@ const getExpenseTypeName = async (id) => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get expense type ok!')
-            console.log(response.data)
+            console.log(response.data.data)
 
-            data = response.data
+            data = response.data.data
         })
         .catch(function (error) {
             console.log(error)
@@ -420,9 +420,9 @@ const getStatusTypeName = async (id) => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get status type ok!')
-            console.log(response.data)
+            console.log(response.data.data)
 
-            data = response.data
+            data = response.data.data
         })
         .catch(function (error) {
             console.log(error)

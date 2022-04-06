@@ -27,9 +27,9 @@ const getTableData = () => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get expense data ok!')
-            console.log(response.data)
+            console.log(response.data.data)
 
-            formatTableData(response.data)
+            formatTableData(response.data.data)
         })
         .catch(function (error) {
             console.log(error)

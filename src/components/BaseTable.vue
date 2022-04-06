@@ -18,12 +18,12 @@ const currentPage = ref(1);
 const getTableData = () => {
     axios.get('http://127.0.0.1:8080/testData/selectAll')
         .then(function (response) {
-            let tableDataTemp = response.data;
+            let tableDataTemp = response.data.data;
             formatTableData(tableDataTemp);
 
             // TEST 控制台输出提示
             console.log('Get table data success');
-            console.log(response.data);
+            console.log(response.data.data);
         })
         .catch(function (error) {
             console.log(error);
@@ -113,7 +113,7 @@ const insertData = () => {
             insertDataForm.date = '';
 
             // TEST 控制台输出提示
-            console.log('add ' + response.data + ' row');
+            console.log('add ' + response.data.data + ' row');
         })
         .catch(function (error) {
             console.log(error);
@@ -192,7 +192,7 @@ const editData = () => {
     })
         .then(function (response) {
             // TEST 控制台输出提示
-            console.log('edit ' + response.data + ' row');
+            console.log('edit ' + response.data.data + ' row');
         })
         .catch(function (error) {
             console.log(error);
