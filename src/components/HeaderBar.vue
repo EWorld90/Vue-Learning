@@ -12,8 +12,7 @@ const handleSelect = (index, indexPath) => {
     // 前往 login 页面时删除用户登录状态
     if (index === '/login') {
         localStorage.removeItem('userName');
-        localStorage.removeItem('userPermission');
-        localStorage.removeItem('userLoginTime');
+        localStorage.removeItem('token');
     }
 }
 </script>

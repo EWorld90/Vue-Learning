@@ -3,8 +3,7 @@ import HeaderBar from './HeaderBar.vue';
 
 // TEST 控制台输出提示
 console.log('user name: ' + localStorage.getItem('userName'));
-console.log('user permission: ' + localStorage.getItem('userPermission'));
-console.log('user login time: ' + localStorage.getItem('userLoginTime'));
+console.log('token: ' + localStorage.getItem('token'));
 </script>
 
 <template>

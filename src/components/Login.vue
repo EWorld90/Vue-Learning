@@ -2,8 +2,9 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from "element-plus"
-import axios from 'axios'
 import md5 from 'js-md5'
+
+import axiosRequest from '../utils/axiosUtils.js'
 
 const router = useRouter()
 
@@ -14,32 +15,30 @@ const form = reactive({
 })
 
 const onSubmit = () => {
-    const url = 'http://127.0.0.1:8080/login'
     // 对密码进行加盐 md5 加密
     const salt = Math.round(Math.random() * 1000);
-    axios.get(url, {
+    axiosRequest.get('/login', {
         params: {
             name: form.name,
             password: md5(form.password + salt),
             salt: salt
         }
     }).then(function (response) {
-        if (response.data.data.user !== null) {
+        if (response.data.status === 200) {
             // TEST 控制台输出提示
             console.log('success')
 
-            localStorage.setItem('userName', response.data.data.user.name)
-            localStorage.setItem('userPermission', response.data.data.user.permission)
-            localStorage.setItem('userLoginTime', Date.parse(new Date()) / 1000)
+            localStorage.setItem('userName', form.name)
+            localStorage.setItem('token', response.data.data)
 
             router.push('/basetable')
             ElMessage.success('登录成功')
         } else {
-            ElMessage.error(response.data.data.status)
+            ElMessage.error(response.data.data)
         }
     }).catch(function (error) {
         console.log(error);
-        ElMessage.error(response.data.data.status)
+        ElMessage.error(response.data.data)
     })
 }
 </script>

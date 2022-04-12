@@ -1,13 +1,14 @@
 <script setup>
 import { ref, reactive, toRaw } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import axios from 'axios'
 import Decimal from 'decimal.js'
 
 import {
     Refresh,
     Plus
 } from '@element-plus/icons-vue'
+
+import axiosRequest from '../utils/axiosUtils.js'
 
 // 表格信息
 const tableData = ref([]);
@@ -37,7 +38,7 @@ const sliceTableData = () => {
 const getTableData = async () => {
     let data = null
 
-    await axios.get('http://127.0.0.1:8080/taskData/listAll')
+    await axiosRequest.get('http://127.0.0.1:8080/taskData/listAll')
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get table data ok!')
@@ -117,7 +118,7 @@ const openDetailDialog = (row) => {
 const getTaskDetail = async (taskId) => {
     let data = null
 
-    await axios.get('http://127.0.0.1:8080/taskDetail/listByTaskId?taskId=' + taskId)
+    await axiosRequest.get('http://127.0.0.1:8080/taskDetail/listByTaskId?taskId=' + taskId)
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get table detail ok!')
@@ -145,7 +146,7 @@ const getTaskMember = async (taskId) => {
     // 清除之前的数据
     detailDialog.memberData = []
 
-    await axios.get('http://127.0.0.1:8080/taskMember/listByTaskId?taskId=' + taskId)
+    await axiosRequest.get('http://127.0.0.1:8080/taskMember/listByTaskId?taskId=' + taskId)
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get table member ok!')
@@ -224,7 +225,7 @@ const checkSubmitAddForm = () => {
 
 // 提交添加表单
 const submitAddForm = () => {
-    axios.post('http://127.0.0.1:8080/taskData/save', {
+    axiosRequest.post('http://127.0.0.1:8080/taskData/save', {
         taskIndex: addForm.taskIndex,
         taskName: addForm.taskName,
         taskStartDate: addForm.taskDate[0],
@@ -329,7 +330,7 @@ const submitEditTaskDataForm = () => {
         }
     }
 
-    axios.post('http://127.0.0.1:8080/taskData/updateById', {
+    axiosRequest.post('http://127.0.0.1:8080/taskData/updateById', {
         id: editDialog.editRow.id,
         taskIndex: editTaskDataForm.taskIndex,
         taskName: editTaskDataForm.taskName,
@@ -409,7 +410,7 @@ const getUserName = async (id) => {
     if (userMap.get(id)) {
         return userMap.get(id)
     } else {
-        await axios.get('http://127.0.0.1:8080/user/getNameById?id=' + id)
+        await axiosRequest.get('http://127.0.0.1:8080/user/getNameById?id=' + id)
             .then(function (response) {
                 // TEST 控制台输出提示
                 console.log('Get user name ok!')
@@ -426,7 +427,7 @@ const getUserName = async (id) => {
 
 // 获取全部用户的 id 与对应的 name，并本地保存
 const getAllUserName = () => {
-    axios.get('http://127.0.0.1:8080/user/listAll')
+    axiosRequest.get('http://127.0.0.1:8080/user/listAll')
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get user list ok!')
@@ -444,7 +445,7 @@ const getAllUserName = () => {
 const getExpenseTypeName = async (id) => {
     let data = null
 
-    await axios.get('http://127.0.0.1:8080/expenseType/listAll')
+    await axiosRequest.get('http://127.0.0.1:8080/expenseType/listAll')
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get expense type ok!')
@@ -465,7 +466,7 @@ const getExpenseTypeName = async (id) => {
 const getStatusTypeName = async (id) => {
     let data = null
 
-    await axios.get('http://127.0.0.1:8080/statusType/listAll')
+    await axiosRequest.get('http://127.0.0.1:8080/statusType/listAll')
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get status type ok!')
