@@ -1,12 +1,9 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import axios from 'axios'
+import { Refresh, Plus } from '@element-plus/icons-vue'
 
-import {
-    Refresh,
-    Plus
-} from '@element-plus/icons-vue'
+import axiosRequest from '../utils/axiosUtils.js'
 
 // 表格信息
 const tableData = ref([]);
@@ -16,7 +13,7 @@ const currentPage = ref(1);
 
 // 获取表格信息
 const getTableData = () => {
-    axios.get('http://127.0.0.1:8080/testData/selectAll')
+    axiosRequest.get('/testData/selectAll')
         .then(function (response) {
             let tableDataTemp = response.data.data;
             formatTableData(tableDataTemp);
@@ -54,7 +51,7 @@ const formatTableIndex = (index) => {
 // 删除表格指定行
 const deleteTableRow = (rowIndex, rowId) => {
     tableData.value.splice(rowIndex, 1);
-    axios.get('http://127.0.0.1:8080/testData/deleteById', {
+    axiosRequest.get('http://127.0.0.1:8080/testData/deleteById', {
         params: {
             id: rowId
         }
@@ -102,7 +99,7 @@ const insertDataForm = reactive({
 
 // 添加表格数据
 const insertData = () => {
-    axios.post('http://127.0.0.1:8080/testData/insert', {
+    axiosRequest.post('http://127.0.0.1:8080/testData/insert', {
         name: insertDataForm.name,
         date: insertDataForm.date,
         status: 1
@@ -185,7 +182,7 @@ const editData = () => {
         editRow.status = '已完成';
     }
 
-    axios.post('http://127.0.0.1:8080/testData/updateNameAndStatus', {
+    axiosRequest.post('http://127.0.0.1:8080/testData/updateNameAndStatus', {
         id: editDataForm.id,
         name: editDataForm.name,
         status: editDataForm.status
@@ -235,9 +232,8 @@ getTableData();
         <el-button type="primary" :icon="Plus" circle @click="dialogInsertDataFormVisible = true"></el-button>
         <el-button type="success" :icon="Refresh" circle @click="getTableData"></el-button>
     </div>
-    
+
     <div class="table-container">
-        
         <el-table
             class="table-content"
             :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
@@ -245,7 +241,13 @@ getTableData();
             stripe
             height="537"
         >
-            <el-table-column label="序号" type="index" :index="formatTableIndex" width="60" align="center"></el-table-column>
+            <el-table-column
+                label="序号"
+                type="index"
+                :index="formatTableIndex"
+                width="60"
+                align="center"
+            ></el-table-column>
             <el-table-column label="编号" prop="id"></el-table-column>
             <el-table-column label="名称" prop="name"></el-table-column>
             <el-table-column label="日期" prop="date"></el-table-column>
@@ -276,7 +278,6 @@ getTableData();
             v-model:current-page="currentPage"
             :total="tableDataLength"
         />
-        
     </div>
 
     <el-dialog v-model="dialogInsertDataFormVisible" title="添加数据" width="25%">

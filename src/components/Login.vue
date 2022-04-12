@@ -2,8 +2,9 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from "element-plus"
-import axios from 'axios'
 import md5 from 'js-md5'
+
+import axiosRequest from '../utils/axiosUtils.js'
 
 const router = useRouter()
 
@@ -14,10 +15,9 @@ const form = reactive({
 })
 
 const onSubmit = () => {
-    const url = 'http://127.0.0.1:8080/login'
     // 对密码进行加盐 md5 加密
     const salt = Math.round(Math.random() * 1000);
-    axios.get(url, {
+    axiosRequest.get('/login', {
         params: {
             name: form.name,
             password: md5(form.password + salt),

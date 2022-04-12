@@ -11,6 +11,7 @@ import router from './router/index.js'
 // App 组件引入
 import App from './App.vue'
 
+// 初始化
 const app = createApp(App)
 
 app.use(ElementPlus)

@@ -1,7 +1,8 @@
 <script setup>
 import { ref, reactive, toRaw } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import axios from 'axios'
+
+import axiosRequest from '../utils/axiosUtils.js'
 
 import {
     Refresh,
@@ -23,7 +24,7 @@ const sliceTableData = () => {
 
 // 获取全部表格信息
 const getTableData = () => {
-    axios.get('http://127.0.0.1:8080/expenseData/listAll')
+    axiosRequest.get('http://127.0.0.1:8080/expenseData/listAll')
         .then(function (response) {
             // TEST 控制台输出提示
             console.log('Get expense data ok!')
