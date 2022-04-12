@@ -1,6 +1,7 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, reactive, toRaw } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import Decimal from 'decimal.js'
 
 import {
@@ -179,10 +180,49 @@ const addForm = reactive({
     taskLeaderUserId: '',
     taskBudget: '',
 })
+const addFormRef = ref<FormInstance>()
+const addFormRules = reactive({
+    taskIndex: [
+        {
+            required: true,
+            message: '请输入课题编号',
+            trigger: 'blur',
+        }
+    ],
+    taskName: [
+        {
+            required: true,
+            message: '请输入课题名',
+            trigger: 'blur',
+        }
+    ],
+    taskDate: [
+        {
+            required: true,
+            message: '请选择日期',
+            trigger: 'change',
+        }
+    ],
+    taskLeaderUserId: [
+        {
+            required: true,
+            message: '请选择负责人',
+            trigger: 'change',
+        }
+    ],
+    taskBudget: [
+        {
+            required: true,
+            message: '请输入预算',
+            trigger: 'blur',
+        },
+        // TODO 自定义预算的验证规则
+    ],
+})
 
 // 初始化添加对话框
 const openAddDialog = () => {
-    // 清除表单数据
+    // TODO 调用 Ref 清除表单数据
     for (const key of Object.keys(addForm)) {
         addForm[key] = ''
     }
@@ -194,45 +234,53 @@ const openAddDialog = () => {
 }
 
 // 确认提交添加表单的操作
-const checkSubmitAddForm = () => {
-    // TODO: 表单验证功能
+const checkSubmitAddForm = async (formRef: FormInstance | undefined) => {
+    // 表单验证功能
+    if (!formRef) return
 
-    ElMessageBox.confirm(
-        '确认添加？',
-        '警告',
-        {
-            confirmButtonText: '确认',
-            cancelButtonText: '取消',
-            type: 'warning',
+    await formRef.validate((valid, fields) => {
+        if (valid) {
+            ElMessageBox.confirm(
+                '确认添加？',
+                '警告',
+                {
+                    confirmButtonText: '确认',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }
+            )
+                .then(async () => {
+                    await submitAddForm()
+                    ElMessage({
+                        type: 'success',
+                        message: '添加成功',
+                    })
+                    addDialog.isVisible = false
+                })
+                .catch(() => {
+                    ElMessage({
+                        type: 'info',
+                        message: '已取消',
+                        duration: 1000,
+                    })
+                })
+        } else {
+            // TEST 控制台输出提示
+            console.log('error submit:', fields)
         }
-    )
-        .then(async () => {
-            await submitAddForm()
-            ElMessage({
-                type: 'success',
-                message: '添加成功',
-            })
-            addDialog.isVisible = false
-        })
-        .catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '已取消',
-                duration: 1000,
-            })
-        })
+    })
 }
 
 // 提交添加表单
-const submitAddForm = () => {
-    axiosRequest.post('http://127.0.0.1:8080/taskData/save', {
+const submitAddForm = async () => {
+    await axiosRequest.post('http://127.0.0.1:8080/taskData/save', {
         taskIndex: addForm.taskIndex,
         taskName: addForm.taskName,
         taskStartDate: addForm.taskDate[0],
         taskEndDate: addForm.taskDate[1],
         taskLeaderUserId: addForm.taskLeaderUserId,
-        taskBudget: Decimal(addForm.taskBudget).toNumber(),
-        taskBalance: Decimal(addForm.taskBudget).toNumber(),
+        taskBudget: new Decimal(addForm.taskBudget).toNumber(),
+        taskBalance: new Decimal(addForm.taskBudget).toNumber(),
         taskStatusId: 1
     })
         .then(function (response) {
@@ -267,7 +315,7 @@ const editTaskDataDialog = reactive({
 const editTaskDataForm = reactive({
     taskIndex: '',
     taskName: '',
-    taskDate: '',
+    taskDate: [],
     taskLeaderUserId: '',
     taskBudget: '',
     taskStatusId: -1,
@@ -295,7 +343,6 @@ const openEditTaskDataDialog = () => {
     editTaskDataDialog.isVisible = true
 }
 
-// TODO: 提交编辑课题信息表单
 const checkSubmitEditTaskDataForm = () => {
     ElMessageBox.confirm(
         '确认编辑？',
@@ -337,8 +384,8 @@ const submitEditTaskDataForm = () => {
         taskStartDate: editTaskDataForm.taskDate[0],
         taskEndDate: editTaskDataForm.taskDate[1],
         taskLeaderUserId: editTaskDataForm.taskLeaderUserId,
-        taskBudget: Decimal(editTaskDataForm.taskBudget).toNumber(),
-        taskBalance: Decimal(editTaskDataForm.taskBudget).toNumber(),
+        taskBudget: new Decimal(editTaskDataForm.taskBudget).toNumber(),
+        taskBalance: new Decimal(editTaskDataForm.taskBudget).toNumber(),
         taskStatusId: editTaskDataForm.taskStatusId,
     })
         .then(function (response) {
@@ -378,7 +425,6 @@ const openEditTaskMemberDialog = () => {
     editTaskMemberDialog.isVisible = true
 }
 
-// TODO: 删除指定的课题列表数据
 const checkDeleteTableRow = (index, row) => {
     ElMessageBox.confirm(
         '确认删除？',
@@ -399,6 +445,7 @@ const checkDeleteTableRow = (index, row) => {
         .catch(() => { })
 }
 
+// TODO: 删除指定的课题列表数据
 const DeleteTableRow = (index, row) => {
     tableData.value.splice(index, 1)
 
@@ -442,7 +489,7 @@ const getAllUserName = () => {
 }
 
 // 获取开支类别 id 对应的开支类别 name，并本地保存
-const getExpenseTypeName = async (id) => {
+const getExpenseTypeName = async () => {
     let data = null
 
     await axiosRequest.get('http://127.0.0.1:8080/expenseType/listAll')
@@ -463,7 +510,7 @@ const getExpenseTypeName = async (id) => {
 }
 
 // 获取状态类别 id 对应的状态类别 name，并本地保存
-const getStatusTypeName = async (id) => {
+const getStatusTypeName = async () => {
     let data = null
 
     await axiosRequest.get('http://127.0.0.1:8080/statusType/listAll')
@@ -568,7 +615,13 @@ getTableData()
 
     <!-- 添加对话框 -->
     <el-dialog v-model="addDialog.isVisible" title="添加新课题" width="40%">
-        <el-form :model="addForm" label-position="left" label-width="100px">
+        <el-form
+            :model="addForm"
+            ref="addFormRef"
+            :rules="addFormRules"
+            label-position="left"
+            label-width="100px"
+        >
             <el-form-item label="课题编号" prop="taskIndex">
                 <el-input v-model="addForm.taskIndex" type="text" clearable></el-input>
             </el-form-item>
@@ -597,10 +650,10 @@ getTableData()
                 </el-select>
             </el-form-item>
             <el-form-item label="预算" prop="taskBudget">
-                <el-input v-model="addForm.taskBudget" type="text" clearable></el-input>
+                <el-input v-model="addForm.taskBudget" type="text"></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="checkSubmitAddForm">提交</el-button>
+                <el-button type="primary" @click="checkSubmitAddForm(addFormRef)">提交</el-button>
                 <el-button @click="addDialog.isVisible = false">关闭</el-button>
             </el-form-item>
         </el-form>
