@@ -19,9 +19,11 @@ axiosRequest.interceptors.request.use(function (config) {
 })
 
 // 响应拦截器配置
-axiosRequest.interceptors.response.use(function (response){
+axiosRequest.interceptors.response.use(function (response) {
+    return response
+}, function (error) {
     // 响应为 401 时为 Token 不存在或过期，跳转回登录界面
-    if (response.data.status === 401) {
+    if (error.response.data.status === 401) {
         ElMessage({
             type: 'error',
             message: '用户登录信息过期',
@@ -32,10 +34,8 @@ axiosRequest.interceptors.response.use(function (response){
         localStorage.removeItem('token')
         router.push('/login')
 
-        return null
     }
-
-    return response
+    return Promise.reject(error);
 })
 
 export default axiosRequest
