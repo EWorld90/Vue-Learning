@@ -4,12 +4,10 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import Decimal from 'decimal.js'
 
-import {
-    Refresh,
-    Plus
-} from '@element-plus/icons-vue'
+import { Refresh, Plus } from '@element-plus/icons-vue'
 
 import axiosRequest from '../utils/axiosUtils.js'
+import { validateCheckAmount } from '../utils/checkUtils.js'
 
 // 表格信息
 const tableData = ref([]);
@@ -181,6 +179,8 @@ const addForm = reactive({
     taskBudget: '',
 })
 const addFormRef = ref<FormInstance>()
+
+// 添加表单验证规则
 const addFormRules = reactive({
     taskIndex: [
         {
@@ -212,25 +212,25 @@ const addFormRules = reactive({
     ],
     taskBudget: [
         {
+            validator: validateCheckAmount,
             required: true,
-            message: '请输入预算',
             trigger: 'blur',
         },
-        // TODO 自定义预算的验证规则
     ],
 })
 
 // 初始化添加对话框
 const openAddDialog = () => {
-    // TODO 调用 Ref 清除表单数据
-    for (const key of Object.keys(addForm)) {
-        addForm[key] = ''
-    }
-
     // TODO: 根据用户权限获取对应的用户列表
     getAllUserName()
 
     addDialog.isVisible = true
+}
+
+// 重置添加对话框
+const resetAddDialog = (formRef: FormInstance | undefined) => {
+    if (!formRef) return
+    formRef.resetFields()
 }
 
 // 确认提交添加表单的操作
@@ -273,7 +273,7 @@ const checkSubmitAddForm = async (formRef: FormInstance | undefined) => {
 
 // 提交添加表单
 const submitAddForm = async () => {
-    await axiosRequest.post('http://127.0.0.1:8080/taskData/save', {
+    await axiosRequest.post('/taskData/add', {
         taskIndex: addForm.taskIndex,
         taskName: addForm.taskName,
         taskStartDate: addForm.taskDate[0],
@@ -650,10 +650,11 @@ getTableData()
                 </el-select>
             </el-form-item>
             <el-form-item label="预算" prop="taskBudget">
-                <el-input v-model="addForm.taskBudget" type="text"></el-input>
+                <el-input v-model="addForm.taskBudget" type="text" clearable></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="checkSubmitAddForm(addFormRef)">提交</el-button>
+                <el-button type="warning" @click="resetAddDialog(addFormRef)">重置</el-button>
                 <el-button @click="addDialog.isVisible = false">关闭</el-button>
             </el-form-item>
         </el-form>
