@@ -250,19 +250,28 @@ const checkSubmitAddForm = async (formRef: FormInstance | undefined) => {
                 }
             )
                 .then(async () => {
-                    await submitAddForm()
-                    ElMessage({
-                        type: 'success',
-                        message: '添加成功',
-                    })
-                    addDialog.isVisible = false
+                    let status = await submitAddForm()
+
+                    if (status.isSuccess === true) {
+                        ElMessage({
+                            type: 'success',
+                            message: '添加成功',
+                        })
+                        addDialog.isVisible = false
+                    } else {
+                        ElMessage({
+                            type: 'error',
+                            message: status.response.data.data,
+                            duration: 5000,
+                        })
+                    }
                 })
                 .catch(() => {
-                    ElMessage({
-                        type: 'info',
-                        message: '已取消',
-                        duration: 1000,
-                    })
+                    // ElMessage({
+                    //     type: 'info',
+                    //     message: '已取消',
+                    //     duration: 1000,
+                    // })
                 })
         } else {
             // TEST 控制台输出提示
@@ -273,6 +282,11 @@ const checkSubmitAddForm = async (formRef: FormInstance | undefined) => {
 
 // 提交添加表单
 const submitAddForm = async () => {
+    let status = {
+        isSuccess: false,
+        response: null,
+    }
+
     await axiosRequest.post('/taskData/add', {
         taskIndex: addForm.taskIndex,
         taskName: addForm.taskName,
@@ -287,10 +301,16 @@ const submitAddForm = async () => {
             // TEST 控制台输出提示
             console.log('Post task data ok!')
             console.log(response.data.data)
+
+            status.isSuccess = true
+            status.response = response
         })
         .catch(function (error) {
             console.log(error);
+            status.response = error.response
         });
+
+    return status
 }
 
 // 编辑对话框信息
