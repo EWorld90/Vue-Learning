@@ -130,7 +130,6 @@ const getTaskDetail = async (taskId) => {
         })
 
     // 修改开支类别 id 为开支类别 name
-    await getExpenseTypeName()
     for (let d of data) {
         d.expenseTypeId = expenseTypeMap.get(d.expenseTypeId)
     }
@@ -558,6 +557,7 @@ const getStatusTypeName = async () => {
 
 // 页面初始化
 getTableData()
+getExpenseTypeName()
 </script>
 
 <template>
