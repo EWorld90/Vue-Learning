@@ -431,7 +431,7 @@ const checkSubmitEditTaskDataForm = async (formRef: FormInstance | undefined) =>
                             type: 'success',
                             message: '编辑成功',
                         })
-                        addDialog.isVisible = false
+                        editTaskDataDialog.isVisible = false
                     } else {
                         ElMessage({
                             type: 'error',
@@ -479,7 +479,6 @@ const submitEditTaskDataForm = async () => {
         taskEndDate: editTaskDataForm.taskDate[1],
         taskLeaderUserId: editTaskDataForm.taskLeaderUserId,
         taskBudget: new Decimal(editTaskDataForm.taskBudget).toNumber(),
-        taskBalance: new Decimal(editTaskDataForm.taskBudget).toNumber(),
         taskStatusId: editTaskDataForm.taskStatusId,
     })
         .then(function (response) {
