@@ -431,6 +431,10 @@ const checkSubmitEditTaskDataForm = async (formRef: FormInstance | undefined) =>
                             type: 'success',
                             message: '编辑成功',
                         })
+
+                        // 编辑成功后刷新一次表格
+                        getTableData()
+
                         editTaskDataDialog.isVisible = false
                     } else {
                         ElMessage({
@@ -559,7 +563,7 @@ const getUserName = async (id) => {
                 console.log('Get user name ok!')
                 console.log(response.data.data)
 
-                userMap.set(id, response.data.data.name)
+                userMap.set(id, response.data.data)
             })
             .catch(function (error) {
                 console.log(error)

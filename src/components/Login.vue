@@ -28,8 +28,8 @@ const onSubmit = () => {
             // TEST 控制台输出提示
             console.log('success')
 
-            localStorage.setItem('userName', form.name)
-            localStorage.setItem('token', response.data.data)
+            localStorage.setItem('userName', response.data.data.name)
+            localStorage.setItem('token', response.data.data.token)
 
             router.push('/basetable')
             ElMessage.success('登录成功')

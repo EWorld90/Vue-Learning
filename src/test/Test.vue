@@ -563,7 +563,7 @@ const getUserName = async (id) => {
                 console.log('Get user name ok!')
                 console.log(response.data.data)
 
-                userMap.set(id, response.data.data.name)
+                userMap.set(id, response.data.data)
             })
             .catch(function (error) {
                 console.log(error)
