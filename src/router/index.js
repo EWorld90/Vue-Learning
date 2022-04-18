@@ -43,7 +43,7 @@ const routes = [
     },
     {
         path: '/',
-        redirect: '/basetable',
+        redirect: '/login',
     },
     // TEST 测试界面路由入口
     {
@@ -51,43 +51,51 @@ const routes = [
         name: 'Test',
         component: testRoute,
     },
-];
+]
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
-});
+})
 
-// TODO: 用 meta 处理页面权限 userPermission
-let userName = undefined
 router.beforeEach((to, from, next) => {
-    userName = localStorage.getItem('userName')
+    let userName = localStorage.getItem('userName')
 
     // TEST test页面无视导航守卫
     if (to.path === '/test') {
         // TEST 控制台输出提示
-        console.log('goto test page');
+        console.log('goto test page')
 
-        next();
+        next()
+    } else {
+        // 检查用户是否登录
+        if (!userName) {
+            // 未登录的情况下，访问其他页面则重定向到登录页面
+            if (to.path !== '/login') {
+                // TEST 控制台输出提示
+                console.log(to.path + " but not logged in, goto login")
+                
+                next('/login')
+            } else {
+                next()
+            }
+        }
+        // 如果在登录状态前往登录页面，则重定向回主页
+        else if (to.path === '/login') {
+            // TEST 控制台输出提示
+            console.log(to.path + " but logged in, goto basetable")
+            
+            next('/basetable')
+        }
+        // 登录状态下正常访问页面
+        else {
+            // TEST 控制台输出提示
+            console.log(to.path)
+        
+            next()
+        }
     }
 
-    // 检查用户是否登录
-    if (!userName && to.path !== '/login') {
-        // TEST 控制台输出提示
-        console.log(to.path + " but not logged in, goto login");
+})
 
-        next('/login');
-    }
-    
-    // 如果在登录状态前往登录页面，则跳转回主页
-    if (userName && to.path === '/login') {
-        next('/')
-    }
-
-    // TEST 控制台输出提示
-    console.log(to.path);
-
-    next();
-});
-
-export default router;
+export default router
