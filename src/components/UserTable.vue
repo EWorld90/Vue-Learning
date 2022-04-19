@@ -1,6 +1,7 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, reactive, toRaw } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
+import type { FormInstance } from "element-plus";
 
 import axiosRequest from "../utils/axiosUtils.js";
 
@@ -9,6 +10,37 @@ import { Refresh, Plus } from "@element-plus/icons-vue";
 // 表格信息
 const tableData = ref([]);
 const tableDataLength = ref(0);
+
+// 各项 id 与 name 的对应 Array
+const roleArray = ref([
+    {
+        id: 1,
+        name: "管理员",
+    },
+    {
+        id: 2,
+        name: "高级用户",
+    },
+    {
+        id: 3,
+        name: "普通用户",
+    },
+]);
+
+const permissionArray = ref([
+    {
+        id: 1,
+        name: 1,
+    },
+    {
+        id: 2,
+        name: 2,
+    },
+    {
+        id: 3,
+        name: 3,
+    },
+]);
 
 // 分页信息
 const pageSize = ref(15);
@@ -40,6 +72,13 @@ const getTableData = () => {
 
 // 格式化表格信息
 const formatTableData = (data) => {
+    // 修改用户角色显示
+    console.log(roleArray.value[data[90].role].id);
+
+    for (let i = 0; i < data.length; i++) {
+        data[i].role = roleArray.value[data[i].role - 1].name;
+    }
+
     // 向表格填入信息
     tableData.value = data;
 
@@ -53,6 +92,138 @@ const formatTableIndex = (index) => {
     return index + 1 + (currentPage.value - 1) * pageSize.value;
 };
 
+// 添加对话框信息
+const addDialog = reactive({
+    isVisible: false,
+});
+
+// 添加表单信息
+const addForm = reactive({
+    name: "",
+    password: "",
+    role: "",
+    permission: "",
+});
+const addFormRef = ref<FormInstance>();
+
+// 添加表单验证规则
+const addFormRules = reactive({
+    name: [
+        {
+            required: true,
+            message: "请输入用户名",
+            trigger: "blur",
+        },
+    ],
+    password: [
+        {
+            required: true,
+            message: "请输入密码",
+            trigger: "blur",
+        },
+    ],
+    role: [
+        {
+            required: true,
+            message: "请选择用户角色",
+            trigger: "change",
+        },
+    ],
+    permission: [
+        {
+            required: true,
+            message: "请选择用户权限",
+            trigger: "change",
+        },
+    ],
+});
+
+// 初始化添加对话框
+const openAddDialog = () => {
+    addDialog.isVisible = true;
+};
+
+// 重置添加对话框
+const resetAddDialog = (formRef: FormInstance | undefined) => {
+    if (!formRef) return;
+    formRef.resetFields();
+};
+
+// 确认提交添加表单的操作
+const checkSubmitAddForm = async (formRef: FormInstance | undefined) => {
+    if (!formRef) return;
+    console.log(typeof addForm.role);
+    console.log(addForm.permission);
+
+    // 表单验证功能
+    await formRef.validate((valid, fields) => {
+        if (valid) {
+            ElMessageBox.confirm("确认添加？", "警告", {
+                confirmButtonText: "确认",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(async () => {
+                    let status = await submitAddForm();
+
+                    if (status.isSuccess === true) {
+                        ElMessage({
+                            type: "success",
+                            message: "添加成功",
+                        });
+                        addDialog.isVisible = false;
+                    } else {
+                        ElMessage({
+                            type: "error",
+                            message: status.response.data.data,
+                            duration: 5000,
+                        });
+                    }
+                })
+                .catch(() => {
+                    // ElMessage({
+                    //     type: 'info',
+                    //     message: '已取消',
+                    //     duration: 1000,
+                    // })
+                });
+        } else {
+            // TEST 控制台输出提示
+            console.log("error submit:", fields);
+        }
+    });
+};
+
+// 提交添加表单
+const submitAddForm = async () => {
+    let status = {
+        isSuccess: false,
+        response: null,
+    };
+
+    await axiosRequest
+        .post("/user/add", {
+            name: addForm.name,
+            password: addForm.password,
+            role: addForm.role,
+            permission: addForm.permission,
+        })
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log("Post task data ok!");
+            console.log(response.data.data);
+
+            status.isSuccess = true;
+            status.response = response;
+        })
+        .catch(function (error) {
+            console.log(error);
+            status.response = error.response;
+        });
+
+    return status;
+};
+
 // 页面初始化
 getTableData();
 </script>
@@ -60,7 +231,12 @@ getTableData();
 <template>
     <!-- 表格组件 -->
     <div class="table-functions">
-        <el-button type="primary" :icon="Plus" circle></el-button>
+        <el-button
+            type="primary"
+            :icon="Plus"
+            circle
+            @click="openAddDialog"
+        ></el-button>
         <el-button
             type="success"
             :icon="Refresh"
@@ -116,6 +292,64 @@ getTableData();
             :total="tableDataLength"
         />
     </div>
+
+    <!-- 添加对话框 -->
+    <el-dialog v-model="addDialog.isVisible" title="添加新用户" width="30%">
+        <el-form
+            :model="addForm"
+            ref="addFormRef"
+            :rules="addFormRules"
+            label-position="left"
+            label-width="100px"
+        >
+            <el-form-item label="用户名" prop="name">
+                <el-input
+                    v-model="addForm.name"
+                    type="text"
+                    clearable
+                ></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="password">
+                <el-input
+                    v-model="addForm.password"
+                    type="password"
+                    clearable
+                    show-password
+                ></el-input>
+            </el-form-item>
+            <el-form-item label="角色" prop="role">
+                <el-select v-model="addForm.role" placeholder="请选择">
+                    <el-option
+                        v-for="role in roleArray"
+                        :key="role.id"
+                        :value="role.id"
+                        :label="role.name"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="权限" prop="permission">
+                <el-select v-model="addForm.permission" placeholder="请选择">
+                    <el-option
+                        v-for="permission in permissionArray"
+                        :key="permission.id"
+                        :value="permission.id"
+                        :label="permission.name"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button
+                    type="primary"
+                    @click="checkSubmitAddForm(addFormRef)"
+                    >提交</el-button
+                >
+                <el-button type="warning" @click="resetAddDialog(addFormRef)"
+                    >重置</el-button
+                >
+                <el-button @click="addDialog.isVisible = false">关闭</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
 </template>
 
 <style scoped>

@@ -20,9 +20,9 @@ let expenseTypeMap = new Map();
 let statusTypeMap = new Map();
 
 // 各项 id 与 name 的对应 Array
-let userArray = ref([]);
-let expenseTypeArray = ref([]);
-let statusTypeArray = ref([]);
+const userArray = ref([]);
+const expenseTypeArray = ref([]);
+const statusTypeArray = ref([]);
 
 // 分页信息
 const pageSize = ref(15);
