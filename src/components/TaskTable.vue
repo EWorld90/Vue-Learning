@@ -224,7 +224,6 @@ const addFormRules = reactive({
 
 // 初始化添加对话框
 const openAddDialog = () => {
-    // TODO: 根据用户权限获取对应的用户列表
     getAllUserName();
 
     addDialog.isVisible = true;
@@ -400,7 +399,6 @@ const openEditTaskDataDialog = () => {
         }
     }
 
-    // TODO: 根据用户权限获取对应的用户列表
     getAllUserName();
 
     editTaskDataDialog.isVisible = true;
@@ -532,27 +530,55 @@ const openEditTaskMemberDialog = () => {
     editTaskMemberDialog.isVisible = true;
 };
 
-// TODO: 删除指定的课题列表数据
+// 确认提交删除课题信息请求
 const checkDeleteTableRow = (index, row) => {
     ElMessageBox.confirm("确认删除？", "警告", {
         confirmButtonText: "确认",
         cancelButtonText: "取消",
         type: "warning",
     })
-        .then(() => {
-            DeleteTableRow(index, row);
-            ElMessage({
-                type: "success",
-                message: "删除成功",
-            });
+        .then(async () => {
+            let status = await DeleteTableRow(row.id);
+            if (status.isSuccess === true) {
+                ElMessage({
+                    type: "success",
+                    message: "删除成功",
+                });
+                tableData.value.splice(index + (currentPage.value - 1) * pageSize.value, 1);
+            } else {
+                ElMessage({
+                    type: "error",
+                    message: status.response.data.data,
+                    duration: 5000,
+                });
+            }
         })
         .catch(() => {});
 };
 
-const DeleteTableRow = (index, row) => {
-    tableData.value.splice(index, 1);
+// 提交删除课题信息请求
+const DeleteTableRow = async (id) => {
+    let status = {
+        isSuccess: false,
+        response: null,
+    };
 
-    console.log("delete task data row " + row.id + " test ok");
+    await axiosRequest
+        .get("http://127.0.0.1:8080/taskData/remove?id=" + id)
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log("remove task data test ok");
+            console.log(response.data.data);
+
+            status.isSuccess = true;
+            status.response = response;
+        })
+        .catch(function (error) {
+            console.log(error);
+            status.response = error.response;
+        });
+
+    return status;
 };
 
 // 获取用户 id 对应的用户 name，函数会返回用户 name
