@@ -33,9 +33,9 @@ const handleSelect = (index, indexPath) => {
         <el-menu-item index="/tasktable">课题列表</el-menu-item>
         <el-menu-item index="/expensetable">支出明细</el-menu-item>
         <el-menu-item index="/usertable">用户列表</el-menu-item>
-        <el-menu-item index="/baseusercenter">用户中心</el-menu-item>
         <el-sub-menu index>
             <template #title>{{ userName }}</template>
+            <el-menu-item index="/baseusercenter">用户中心</el-menu-item>
             <el-menu-item index="/login">退出登录</el-menu-item>
         </el-sub-menu>
     </el-menu>
