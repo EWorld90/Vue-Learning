@@ -38,12 +38,12 @@ const routes = [
             {
                 path: "/basetable",
                 name: "BaseTable",
-                component: () => import("../components/basetable.vue"),
+                component: () => import("../components/BaseTable.vue"),
             },
             {
                 path: "/baseusercenter",
                 name: "BaseUserCenter",
-                component: () => import("../components/baseusercenter.vue"),
+                component: () => import("../components/BaseUserCenter.vue"),
             },
         ],
     },
