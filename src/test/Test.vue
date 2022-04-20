@@ -151,7 +151,7 @@ const getTaskMember = async (taskId) => {
         .get("http://127.0.0.1:8080/taskMember/listByTaskId?taskId=" + taskId)
         .then(function (response) {
             // TEST 控制台输出提示
-            console.log("Get table member ok!");
+            console.log("Get task member ok!");
             console.log(response.data.data);
 
             data = response.data.data;
@@ -505,29 +505,128 @@ const submitEditTaskDataForm = async () => {
 // 编辑课题成员对话框信息
 const editTaskMemberDialog = reactive({
     isVisible: false,
-    memberData: [
-        {
-            key: 1,
-            lable: 1,
-            disabled: false,
-        },
-        {
-            key: 2,
-            lable: 2,
-            disabled: false,
-        },
-        {
-            key: 3,
-            lable: 3,
-            disabled: false,
-        },
-    ],
+    memberData: [],
     selectedMember: [],
 });
 
 // 初始化编辑课题成员对话框
-const openEditTaskMemberDialog = () => {
+const openEditTaskMemberDialog = async () => {
+    // 清除穿梭框信息
+    editTaskMemberDialog.memberData = [];
+    editTaskMemberDialog.selectedMember = [];
+
+    // 获取用户列表
+    await axiosRequest
+        .get("http://127.0.0.1:8080/user/listAll")
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log("Get user list ok!");
+            console.log(response.data.data);
+
+            for (const d of response.data.data) {
+                editTaskMemberDialog.memberData.push({
+                    key: d.id,
+                    label: d.name,
+                    disabled: false,
+                });
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
+    // 获取课题成员信息
+    await axiosRequest
+        .get("/taskMember/listByTaskId?taskId=" + editDialog.editRow.id)
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log("Get task member ok!");
+            console.log(response.data.data);
+
+            for (const d of response.data.data) {
+                editTaskMemberDialog.selectedMember.push(d.userId);
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
     editTaskMemberDialog.isVisible = true;
+};
+
+// TEST 控制台输出提示
+const testCheckEditTaskMember = (
+    value: any,
+    direction: "left" | "right",
+    movedKeys: any
+) => {
+    console.log(value, direction, movedKeys);
+};
+
+// 确认提交编辑课题成员请求
+const checkEditTaskMember = () => {
+    // TEST 控制台输出提示
+    console.log(
+        editTaskMemberDialog.memberData,
+        editTaskMemberDialog.selectedMember
+    );
+
+    ElMessageBox.confirm("确认编辑？", "警告", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "warning",
+    })
+        .then(async () => {
+            let status = await editTaskMember();
+
+            if (status.isSuccess === true) {
+                ElMessage({
+                    type: "success",
+                    message: "编辑成功",
+                });
+            } else {
+                ElMessage({
+                    type: "error",
+                    message: status.response.data.data,
+                    duration: 5000,
+                });
+            }
+        })
+        .catch(() => {
+            // ElMessage({
+            //     type: 'info',
+            //     message: '已取消',
+            //     duration: 1000,
+            // })
+        });
+};
+
+// 提交编辑课题成员请求
+const editTaskMember = async () => {
+    let status = {
+        isSuccess: false,
+        response: null,
+    };
+
+    await axiosRequest
+        .post("/taskMember/updateBatchById", {
+            taskId: editDialog.editRow.id,
+            userIdList: editTaskMemberDialog.selectedMember,
+        })
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log("edit task member ok");
+            console.log(response.data.data);
+
+            status.isSuccess = true;
+            status.response = response;
+        })
+        .catch(function (error) {
+            console.log(error);
+            status.response = error.response;
+        });
+
+    return status;
 };
 
 // 确认提交删除课题信息请求
@@ -961,24 +1060,16 @@ getExpenseTypeName();
     >
         <el-transfer
             v-model="editTaskMemberDialog.selectedMember"
-            :titles="['Source', 'Target']"
+            :titles="['非课题成员', '课题成员']"
             :button-texts="['删除', '添加']"
             :data="editTaskMemberDialog.memberData"
+            @change="testCheckEditTaskMember"
         >
-            <!-- <template #left-footer>
-                <el-button class="transfer-footer" size="small"
-                    >Operation</el-button
-                >
-            </template>
-            <template #right-footer>
-                <el-button class="transfer-footer" size="small"
-                    >Operation</el-button
-                >
-            </template> -->
         </el-transfer>
+        <el-button type="primary" @click="checkEditTaskMember"
+            >完成编辑</el-button
+        >
     </el-dialog>
-
-    <!-- 编辑开支类别对话框 -->
 </template>
 
 <style scoped>
