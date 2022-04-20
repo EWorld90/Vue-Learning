@@ -5,6 +5,7 @@ const loginRoute = () => import('../components/Login.vue')
 const homeRoute = () => import('../components/Home.vue')
 const taskTableRoute = () => import('../components/TaskTable.vue')
 const expenseTableRoute = () => import('../components/ExpenseTable.vue')
+const userTableRoute = () => import('../components/UserTable.vue')
 
 const testRoute = () => import('../test/Test.vue')
 
@@ -30,14 +31,19 @@ const routes = [
                 component: expenseTableRoute
             },
             {
+                path: '/usertable',
+                name: 'UserTable',
+                component: userTableRoute
+            },
+            {
                 path: "/basetable",
                 name: "BaseTable",
-                component: () => import("../components/basetable.vue"),
+                component: () => import("../components/BaseTable.vue"),
             },
             {
                 path: "/baseusercenter",
                 name: "BaseUserCenter",
-                component: () => import("../components/baseusercenter.vue"),
+                component: () => import("../components/BaseUserCenter.vue"),
             },
         ],
     },
