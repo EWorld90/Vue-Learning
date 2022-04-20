@@ -57,7 +57,7 @@ const sliceTableData = () => {
 // 获取全部表格信息
 const getTableData = () => {
     axiosRequest
-        .get("/user/listAll?token=" + localStorage.getItem("token"))
+        .get("/user/listAll")
         .then(function (response) {
             // TEST 控制台输出提示
             console.log("Get user data ok!");
@@ -265,7 +265,7 @@ const editFormRules = reactive({
 const openEditDialog = (row) => {
     editDialog.editRow = row;
 
-    editForm.id = row.id
+    editForm.id = row.id;
     editForm.name = row.name;
     editForm.role = row.role;
     editForm.permission = row.permission;
@@ -302,7 +302,7 @@ const checkSubmitEditForm = async (formRef: FormInstance | undefined) => {
 
                         // 编辑成功后刷新一次表格
                         getTableData();
-                        
+
                         editDialog.isVisible = false;
                     } else {
                         ElMessage({
@@ -310,6 +310,8 @@ const checkSubmitEditForm = async (formRef: FormInstance | undefined) => {
                             message: status.response.data.data,
                             duration: 5000,
                         });
+
+                        formRef.resetFields();
                     }
                 })
                 .catch(() => {
@@ -353,6 +355,60 @@ const submitEditForm = async () => {
         .then(function (response) {
             // TEST 控制台输出提示
             console.log("edit task data ok!");
+            console.log(response.data.data);
+
+            status.isSuccess = true;
+            status.response = response;
+        })
+        .catch(function (error) {
+            console.log(error);
+            status.response = error.response;
+        });
+
+    return status;
+};
+
+// 确认提交删除用户信息请求
+const checkDeleteTableRow = (index, row) => {
+    ElMessageBox.confirm("确认删除？", "警告", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "warning",
+    })
+        .then(async () => {
+            let status = await DeleteTableRow(row.id);
+            if (status.isSuccess === true) {
+                ElMessage({
+                    type: "success",
+                    message: "删除成功",
+                });
+                tableData.value.splice(
+                    index + (currentPage.value - 1) * pageSize.value,
+                    1
+                );
+            } else {
+                ElMessage({
+                    type: "error",
+                    message: status.response.data.data,
+                    duration: 5000,
+                });
+            }
+        })
+        .catch(() => {});
+};
+
+// 提交删除用户信息请求
+const DeleteTableRow = async (id) => {
+    let status = {
+        isSuccess: false,
+        response: null,
+    };
+
+    await axiosRequest
+        .get("http://127.0.0.1:8080/user/remove?id=" + id)
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log("remove task data test ok");
             console.log(response.data.data);
 
             status.isSuccess = true;
@@ -427,7 +483,12 @@ getTableData();
                         @click="openEditDialog(scope.row)"
                         >编辑</el-button
                     >
-                    <el-button type="danger" size="small">删除</el-button>
+                    <el-button
+                        type="danger"
+                        size="small"
+                        @click="checkDeleteTableRow(scope.$index, scope.row)"
+                        >删除</el-button
+                    >
                 </template>
             </el-table-column>
         </el-table>

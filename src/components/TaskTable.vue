@@ -544,7 +544,10 @@ const checkDeleteTableRow = (index, row) => {
                     type: "success",
                     message: "删除成功",
                 });
-                tableData.value.splice(index + (currentPage.value - 1) * pageSize.value, 1);
+                tableData.value.splice(
+                    index + (currentPage.value - 1) * pageSize.value,
+                    1
+                );
             } else {
                 ElMessage({
                     type: "error",
@@ -605,10 +608,7 @@ const getUserName = async (id) => {
 // 获取全部用户的 id 与对应的 name，并本地保存
 const getAllUserName = () => {
     axiosRequest
-        .get(
-            "http://127.0.0.1:8080/user/listAll?token=" +
-                localStorage.getItem("token")
-        )
+        .get("http://127.0.0.1:8080/user/listAll")
         .then(function (response) {
             // TEST 控制台输出提示
             console.log("Get user list ok!");
