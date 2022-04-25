@@ -282,7 +282,7 @@ const resetEditDialog = (formRef: FormInstance | undefined) => {
 // 确认提交编辑表单的操作
 const checkSubmitEditForm = async (formRef: FormInstance | undefined) => {
     if (!formRef) return;
-    console.log(editForm);
+    
     // 表单验证功能
     await formRef.validate((valid, fields) => {
         if (valid) {
