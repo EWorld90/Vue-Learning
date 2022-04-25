@@ -8,6 +8,10 @@ import Decimal from 'decimal.js'
 const checkAmount = (amount) => {
     // 检查是否为数字
     if (!isNaN(amount)) {
+        // 检查是否不小于0
+        if (amount < 0) {
+            return false
+        }
         // 检查是否有小数点
         if (amount.toString().indexOf('.') > -1) {
             // 检查小数点后是否大于 2 位

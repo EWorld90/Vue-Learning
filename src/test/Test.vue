@@ -2,45 +2,22 @@
 import { ref, reactive, toRaw } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import type { FormInstance } from "element-plus";
-
-import axiosRequest from "../utils/axiosUtils.js";
+import Decimal from "decimal.js";
 
 import { Refresh, Plus } from "@element-plus/icons-vue";
+
+import axiosRequest from "../utils/axiosUtils.js";
+import { validateCheckAmount } from "../utils/checkUtils.js";
 
 // 表格信息
 const tableData = ref([]);
 const tableDataLength = ref(0);
 
-// 各项 id 与 name 的对应 Array
-const roleArray = ref([
-    {
-        id: 1,
-        name: "管理员",
-    },
-    {
-        id: 2,
-        name: "高级用户",
-    },
-    {
-        id: 3,
-        name: "普通用户",
-    },
-]);
+// 各项 id 与 name 的对应 Map
+let expenseTypeMap = new Map();
 
-const permissionArray = ref([
-    {
-        id: 1,
-        name: 1,
-    },
-    {
-        id: 2,
-        name: 2,
-    },
-    {
-        id: 3,
-        name: 3,
-    },
-]);
+// 各项 id 与 name 的对应 Array
+const expenseTypeArray = ref([]);
 
 // 分页信息
 const pageSize = ref(15);
@@ -55,27 +32,31 @@ const sliceTableData = () => {
 };
 
 // 获取全部表格信息
-const getTableData = () => {
-    axiosRequest
-        .get("/user/listAll")
+const getTableData = async () => {
+    let data = null;
+
+    await axiosRequest
+        .get("/expenseData/listAll")
         .then(function (response) {
             // TEST 控制台输出提示
-            console.log("Get user data ok!");
+            console.log("Get expense data ok!");
             console.log(response.data.data);
 
-            formatTableData(response.data.data);
+            data = response.data.data;
         })
         .catch(function (error) {
             console.log(error);
         });
+
+    await formatTableData(data);
 };
 
 // 格式化表格信息
-const formatTableData = (data) => {
-    // 修改用户角色显示
-
-    for (let i = 0; i < data.length; i++) {
-        data[i].role = roleArray.value[data[i].role - 1].name;
+const formatTableData = async (data) => {
+    // 获取开支类别信息
+    await getExpenseTypeName();
+    for (let d of data) {
+        d.expenseTypeId = expenseTypeMap.get(d.expenseTypeId);
     }
 
     // 向表格填入信息
@@ -98,41 +79,42 @@ const addDialog = reactive({
 
 // 添加表单信息
 const addForm = reactive({
-    name: "",
-    password: "",
-    role: "",
-    permission: "",
+    taskIndex: "",
+    expenseTypeId: "",
+    expenseDate: "",
+    expenseAmount: "",
+    expenseNote: "",
 });
 const addFormRef = ref<FormInstance>();
 
 // 添加表单验证规则
 const addFormRules = reactive({
-    name: [
+    taskIndex: [
         {
             required: true,
-            message: "请输入用户名",
+            message: "请输入课题编号",
             trigger: "blur",
         },
     ],
-    password: [
+    expenseTypeId: [
         {
             required: true,
-            message: "请输入密码",
+            message: "请选择开支类别",
+            trigger: "change",
+        },
+    ],
+    expenseDate: [
+        {
+            required: true,
+            message: "请选择日期",
+            trigger: "change",
+        },
+    ],
+    expenseAmount: [
+        {
+            validator: validateCheckAmount,
+            required: true,
             trigger: "blur",
-        },
-    ],
-    role: [
-        {
-            required: true,
-            message: "请选择用户角色",
-            trigger: "change",
-        },
-    ],
-    permission: [
-        {
-            required: true,
-            message: "请选择用户权限",
-            trigger: "change",
         },
     ],
 });
@@ -199,15 +181,16 @@ const submitAddForm = async () => {
     };
 
     await axiosRequest
-        .post("/user/add", {
-            name: addForm.name,
-            password: addForm.password,
-            role: addForm.role,
-            permission: addForm.permission,
+        .post("/expenseData/add", {
+            taskIndex: addForm.taskIndex,
+            expenseTypeId: addForm.expenseTypeId,
+            expenseDate: addForm.expenseDate,
+            expenseAmount: new Decimal(addForm.expenseAmount).toNumber(),
+            expenseNote: addForm.expenseNote,
         })
         .then(function (response) {
             // TEST 控制台输出提示
-            console.log("Post task data ok!");
+            console.log("Post expense data ok!");
             console.log(response.data.data);
 
             status.isSuccess = true;
@@ -230,33 +213,42 @@ const editDialog = reactive({
 // 编辑表单信息
 const editForm = reactive({
     id: "",
-    name: "",
-    role: "",
-    permission: "",
+    taskIndex: "",
+    expenseTypeId: "",
+    expenseDate: "",
+    expenseAmount: "",
+    expenseNote: "",
 });
 const editFormRef = ref<FormInstance>();
 
 // 编辑表单验证规则
 const editFormRules = reactive({
-    name: [
+    taskIndex: [
         {
             required: true,
-            message: "请输入用户名",
+            message: "请输入课题编号",
             trigger: "blur",
         },
     ],
-    role: [
+    expenseTypeId: [
         {
             required: true,
-            message: "请选择用户角色",
+            message: "请选择开支类别",
             trigger: "change",
         },
     ],
-    permission: [
+    expenseDate: [
         {
             required: true,
-            message: "请选择用户权限",
+            message: "请选择日期",
             trigger: "change",
+        },
+    ],
+    expenseAmount: [
+        {
+            validator: validateCheckAmount,
+            required: true,
+            trigger: "blur",
         },
     ],
 });
@@ -266,9 +258,11 @@ const openEditDialog = (row) => {
     editDialog.editRow = row;
 
     editForm.id = row.id;
-    editForm.name = row.name;
-    editForm.role = row.role;
-    editForm.permission = row.permission;
+    editForm.taskIndex = row.taskIndex;
+    editForm.expenseTypeId = row.expenseTypeId;
+    editForm.expenseDate = row.expenseDate;
+    editForm.expenseAmount = row.expenseAmount;
+    editForm.expenseNote = row.expenseNote;
 
     editDialog.isVisible = true;
 };
@@ -282,7 +276,7 @@ const resetEditDialog = (formRef: FormInstance | undefined) => {
 // 确认提交编辑表单的操作
 const checkSubmitEditForm = async (formRef: FormInstance | undefined) => {
     if (!formRef) return;
-    console.log(editForm);
+
     // 表单验证功能
     await formRef.validate((valid, fields) => {
         if (valid) {
@@ -330,11 +324,11 @@ const checkSubmitEditForm = async (formRef: FormInstance | undefined) => {
 
 // 提交编辑表单
 const submitEditForm = async () => {
-    // 如果未修改角色，需要转换表单中的角色表单项格式
-    if (!Number.isNaN(editForm.role)) {
-        for (const role of roleArray.value) {
-            if (editForm.role === role.name) {
-                editForm.role = String(role.id);
+    // 如果未修改开支类别，需要转换表单中的开支类别表单项格式
+    if (!Number.isNaN(editForm.expenseTypeId)) {
+        for (const expenseType of expenseTypeArray.value) {
+            if (editForm.expenseTypeId === expenseType.expenseName) {
+                editForm.expenseTypeId = expenseType.id;
                 break;
             }
         }
@@ -346,15 +340,17 @@ const submitEditForm = async () => {
     };
 
     await axiosRequest
-        .post("/user/updateById", {
+        .post("/expenseData/updateById", {
             id: editForm.id,
-            name: editForm.name,
-            role: parseInt(editForm.role),
-            permission: editForm.permission,
+            taskIndex: editForm.taskIndex,
+            expenseTypeId: editForm.expenseTypeId,
+            expenseDate: editForm.expenseDate,
+            expenseAmount: new Decimal(editForm.expenseAmount).toNumber(),
+            expenseNote: editForm.expenseNote,
         })
         .then(function (response) {
             // TEST 控制台输出提示
-            console.log("edit task data ok!");
+            console.log("edit expense data ok!");
             console.log(response.data.data);
 
             status.isSuccess = true;
@@ -405,10 +401,10 @@ const DeleteTableRow = async (id) => {
     };
 
     await axiosRequest
-        .get("http://127.0.0.1:8080/user/remove?id=" + id)
+        .get("/expenseData/remove?id=" + id)
         .then(function (response) {
             // TEST 控制台输出提示
-            console.log("remove task data test ok");
+            console.log("remove expense data test ok");
             console.log(response.data.data);
 
             status.isSuccess = true;
@@ -420,6 +416,34 @@ const DeleteTableRow = async (id) => {
         });
 
     return status;
+};
+
+// 获取开支类别 id 对应的开支类别 name，并本地保存
+const getExpenseTypeName = async () => {
+    let data = null;
+
+    await axiosRequest
+        .get("/expenseType/listAll")
+        .then(function (response) {
+            // TEST 控制台输出提示
+            console.log("Get expense type ok!");
+            console.log(response.data.data);
+
+            data = response.data.data;
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
+    expenseTypeArray.value = [];
+    for (const d of data) {
+        expenseTypeMap.set(d.id, d.expenseName);
+
+        // 将数据一同存入 Array 中
+        const id = d.id;
+        const expenseName = d.expenseName;
+        expenseTypeArray.value.push({ id, expenseName });
+    }
 };
 
 // 页面初始化
@@ -458,24 +482,25 @@ getTableData();
                 :index="formatTableIndex"
                 width="60"
                 align="center"
-            >
-            </el-table-column>
-            <el-table-column
-                label="用户名"
-                prop="name"
-                align="center"
             ></el-table-column>
             <el-table-column
-                label="用户角色"
-                prop="role"
-                align="center"
+                label="课题编号"
+                prop="taskIndex"
             ></el-table-column>
             <el-table-column
-                label="用户权限"
-                prop="permission"
-                align="center"
+                label="开支类别"
+                prop="expenseTypeId"
             ></el-table-column>
-            <el-table-column label="操作" align="center" width="135">
+            <el-table-column
+                label="开支日期"
+                prop="expenseDate"
+            ></el-table-column>
+            <el-table-column
+                label="开支花费"
+                prop="expenseAmount"
+            ></el-table-column>
+            <el-table-column label="备注" prop="expenseNote"></el-table-column>
+            <el-table-column label="操作" prop align="center" width="135">
                 <template #default="scope">
                     <el-button
                         type="primary"
@@ -502,7 +527,7 @@ getTableData();
     </div>
 
     <!-- 添加对话框 -->
-    <el-dialog v-model="addDialog.isVisible" title="添加新用户" width="30%">
+    <el-dialog v-model="addDialog.isVisible" title="添加新开支" width="40%">
         <el-form
             :model="addForm"
             ref="addFormRef"
@@ -510,40 +535,46 @@ getTableData();
             label-position="left"
             label-width="100px"
         >
-            <el-form-item label="用户名" prop="name">
+            <el-form-item label="课题编号" prop="taskIndex">
                 <el-input
-                    v-model="addForm.name"
+                    v-model="addForm.taskIndex"
                     type="text"
                     clearable
                 ></el-input>
             </el-form-item>
-            <el-form-item label="密码" prop="password">
-                <el-input
-                    v-model="addForm.password"
-                    type="password"
+            <el-form-item label="开支类别" prop="expenseTypeId">
+                <el-select v-model="addForm.expenseTypeId" placeholder="请选择">
+                    <el-option
+                        v-for="expenseType in expenseTypeArray"
+                        :key="expenseType.id"
+                        :value="expenseType.id"
+                        :label="expenseType.expenseName"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="日期" prop="expenseDate">
+                <el-date-picker
+                    v-model="addForm.expenseDate"
+                    type="date"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
                     clearable
-                    show-password
+                    style="width: 100%"
+                ></el-date-picker>
+            </el-form-item>
+            <el-form-item label="开支花费" prop="expenseAmount">
+                <el-input
+                    v-model="addForm.expenseAmount"
+                    type="text"
+                    clearable
                 ></el-input>
             </el-form-item>
-            <el-form-item label="角色" prop="role">
-                <el-select v-model="addForm.role" placeholder="请选择">
-                    <el-option
-                        v-for="role in roleArray"
-                        :key="role.id"
-                        :value="role.id"
-                        :label="role.name"
-                    />
-                </el-select>
-            </el-form-item>
-            <el-form-item label="权限" prop="permission">
-                <el-select v-model="addForm.permission" placeholder="请选择">
-                    <el-option
-                        v-for="permission in permissionArray"
-                        :key="permission.id"
-                        :value="permission.id"
-                        :label="permission.name"
-                    />
-                </el-select>
+            <el-form-item label="备注" prop="expenseNote">
+                <el-input
+                    v-model="addForm.expenseNote"
+                    type="text"
+                    clearable
+                ></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button
@@ -560,7 +591,7 @@ getTableData();
     </el-dialog>
 
     <!-- 编辑对话框 -->
-    <el-dialog v-model="editDialog.isVisible" title="编辑用户" width="30%">
+    <el-dialog v-model="editDialog.isVisible" title="编辑用户" width="40%">
         <el-form
             :model="editForm"
             ref="editFormRef"
@@ -568,32 +599,49 @@ getTableData();
             label-position="left"
             label-width="100px"
         >
-            <el-form-item label="用户名" prop="name">
+            <el-form-item label="课题编号" prop="taskIndex">
                 <el-input
-                    v-model="editForm.name"
+                    v-model="editForm.taskIndex"
                     type="text"
-                    disabled
+                    clearable
                 ></el-input>
             </el-form-item>
-            <el-form-item label="角色" prop="role">
-                <el-select v-model="editForm.role" placeholder="请选择">
+            <el-form-item label="开支类别" prop="expenseTypeId">
+                <el-select
+                    v-model="editForm.expenseTypeId"
+                    placeholder="请选择"
+                >
                     <el-option
-                        v-for="role in roleArray"
-                        :key="role.id"
-                        :value="role.id"
-                        :label="role.name"
+                        v-for="expenseType in expenseTypeArray"
+                        :key="expenseType.id"
+                        :value="expenseType.id"
+                        :label="expenseType.expenseName"
                     />
                 </el-select>
             </el-form-item>
-            <el-form-item label="权限" prop="permission">
-                <el-select v-model="editForm.permission" placeholder="请选择">
-                    <el-option
-                        v-for="permission in permissionArray"
-                        :key="permission.id"
-                        :value="permission.id"
-                        :label="permission.name"
-                    />
-                </el-select>
+            <el-form-item label="日期" prop="expenseDate">
+                <el-date-picker
+                    v-model="editForm.expenseDate"
+                    type="date"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    clearable
+                    style="width: 100%"
+                ></el-date-picker>
+            </el-form-item>
+            <el-form-item label="开支花费" prop="expenseAmount">
+                <el-input
+                    v-model="editForm.expenseAmount"
+                    type="text"
+                    clearable
+                ></el-input>
+            </el-form-item>
+            <el-form-item label="备注" prop="expenseNote">
+                <el-input
+                    v-model="editForm.expenseNote"
+                    type="text"
+                    clearable
+                ></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button
@@ -618,7 +666,6 @@ getTableData();
     margin: 10px auto;
     text-align: right;
 }
-
 .table-container {
     width: 80%;
     margin: 10px auto;
