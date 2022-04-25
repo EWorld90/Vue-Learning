@@ -6,6 +6,7 @@ const homeRoute = () => import('../components/Home.vue')
 const taskTableRoute = () => import('../components/TaskTable.vue')
 const expenseTableRoute = () => import('../components/ExpenseTable.vue')
 const userTableRoute = () => import('../components/UserTable.vue')
+const userCenterRoute = () => import('../components/UserCenter.vue')
 
 const testRoute = () => import('../test/Test.vue')
 
@@ -36,14 +37,9 @@ const routes = [
                 component: userTableRoute
             },
             {
-                path: "/basetable",
-                name: "BaseTable",
-                component: () => import("../components/BaseTable.vue"),
-            },
-            {
-                path: "/baseusercenter",
-                name: "BaseUserCenter",
-                component: () => import("../components/BaseUserCenter.vue"),
+                path: "/usercenter",
+                name: "UserCenter",
+                component: userCenterRoute
             },
         ],
     },
@@ -91,7 +87,7 @@ router.beforeEach((to, from, next) => {
             // TEST 控制台输出提示
             console.log(to.path + " but logged in, goto basetable")
             
-            next('/basetable')
+            next('/tasktable')
         }
         // 登录状态下正常访问页面
         else {
