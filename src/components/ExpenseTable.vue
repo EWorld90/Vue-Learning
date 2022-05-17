@@ -401,7 +401,7 @@ const DeleteTableRow = async (id) => {
     };
 
     await axiosRequest
-        .get("/expenseData/remove?id=" + id)
+        .get("/expenseData/removeById?id=" + id)
         .then(function (response) {
             // TEST 控制台输出提示
             console.log("remove expense data test ok");
