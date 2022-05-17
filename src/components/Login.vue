@@ -31,7 +31,7 @@ const onSubmit = () => {
             localStorage.setItem('userName', response.data.data.name)
             localStorage.setItem('token', response.data.data.token)
 
-            router.push('/basetable')
+            router.push('/tasktable')
             ElMessage.success('登录成功')
         } else {
             ElMessage.error(response.data.data)

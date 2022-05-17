@@ -405,7 +405,7 @@ const DeleteTableRow = async (id) => {
     };
 
     await axiosRequest
-        .get("http://127.0.0.1:8080/user/remove?id=" + id)
+        .get("http://127.0.0.1:8080/user/removeById?id=" + id)
         .then(function (response) {
             // TEST 控制台输出提示
             console.log("remove task data test ok");

@@ -666,7 +666,7 @@ const DeleteTableRow = async (id) => {
     };
 
     await axiosRequest
-        .get("http://127.0.0.1:8080/taskData/remove?id=" + id)
+        .get("http://127.0.0.1:8080/taskData/removeById?id=" + id)
         .then(function (response) {
             // TEST 控制台输出提示
             console.log("remove task data test ok");
@@ -689,13 +689,13 @@ const getUserName = async (id) => {
         return userMap.get(id);
     } else {
         await axiosRequest
-            .get("http://127.0.0.1:8080/user/getNameById?id=" + id)
+            .get("http://127.0.0.1:8080/user/getById?id=" + id)
             .then(function (response) {
                 // TEST 控制台输出提示
                 console.log("Get user name ok!");
                 console.log(response.data.data);
 
-                userMap.set(id, response.data.data);
+                userMap.set(id, response.data.data.name);
             })
             .catch(function (error) {
                 console.log(error);
